@@ -13,15 +13,32 @@
 #include <softfloat.hpp>
 #include <float.h>
 
+#include <chrono>
+
+std::set<capi_name> privileged_accounts;
+
+struct resource_limit {
+   int64_t ram_bytes;
+   int64_t net_weight;
+   int64_t cpu_weight;
+};
+
+std::map<capi_name, resource_limit> resource_limits;
+
 // Boilerplate
 using namespace eosio::native;
 extern "C" {
    void get_resource_limits( capi_name account, int64_t* ram_bytes, int64_t* net_weight, int64_t* cpu_weight ) {
-      return intrinsics::get().call<intrinsics::get_resource_limits>(account, ram_bytes, net_weight, cpu_weight);
+      resource_limit rl = resource_limits[account];
+      *ram_bytes = rl.ram_bytes;
+      *net_weight = rl.net_weight;
+      *cpu_weight = rl.cpu_weight;
    }
    void set_resource_limits( capi_name account, int64_t ram_bytes, int64_t net_weight, int64_t cpu_weight ) {
-      return intrinsics::get().call<intrinsics::set_resource_limits>(account, ram_bytes, net_weight, cpu_weight);
+      resource_limit rl{ ram_bytes, net_weight, cpu_weight };
+      resource_limits[account] = rl;
    }
+
    int64_t set_proposed_producers( char *producer_data, uint32_t producer_data_size ) {
       return intrinsics::get().call<intrinsics::set_proposed_producers>(producer_data, producer_data_size);
    }
@@ -34,11 +51,16 @@ extern "C" {
    void set_blockchain_parameters_packed( char* data, uint32_t datalen ) {
       return intrinsics::get().call<intrinsics::set_blockchain_parameters_packed>(data, datalen);
    }
+
    bool is_privileged( capi_name account ) {
-      return intrinsics::get().call<intrinsics::is_privileged>(account);
+      return privileged_accounts.count(account);
    }
    void set_privileged( capi_name account, bool is_priv ) {
-      return intrinsics::get().call<intrinsics::set_privileged>(account, is_priv);
+      if (is_priv) {
+         privileged_accounts.insert(account);
+      } else {
+         privileged_accounts.erase(account);
+      }
    }
    bool is_feature_activated( const capi_checksum256* feature_digest ) {
       return intrinsics::get().call<intrinsics::is_feature_activated>(feature_digest);
@@ -46,6 +68,7 @@ extern "C" {
    void preactivate_feature( const capi_checksum256* feature_digest ) {
       return intrinsics::get().call<intrinsics::preactivate_feature>(feature_digest);
    }
+
    uint32_t get_active_producers( capi_name* producers, uint32_t datalen ) {
       return intrinsics::get().call<intrinsics::get_active_producers>(producers, datalen);
    }
@@ -277,10 +300,12 @@ extern "C" {
    int64_t get_account_creation_time( capi_name account ) {
       return intrinsics::get().call<intrinsics::get_account_creation_time>(account);
    }
-   uint64_t  current_time() {
-      return intrinsics::get().call<intrinsics::current_time>();
+
+   uint64_t current_time() {
+      return std::chrono::system_clock::now().time_since_epoch() / std::chrono::milliseconds(1);
    }
-   uint64_t  publication_time() {
+
+   uint64_t publication_time() {
       return intrinsics::get().call<intrinsics::publication_time>();
    }
    uint32_t read_action_data( void* msg, uint32_t len ) {
