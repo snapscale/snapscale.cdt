@@ -6,9 +6,14 @@
 #include <functional>
 #include <stdio.h>
 #include <setjmp.h>
+#include "intrinsics_impl.hpp"
 
 eosio::cdt::output_stream std_out;
 eosio::cdt::output_stream std_err;
+
+std::vector<intrinsic_table>* table_iterator;
+std::map<std::string, intrinsic_table>* tables;
+std::map<std::string, std::vector<intrinsic_table>>* tables_v;
 
 extern "C" {
    int main(int, char**);
@@ -82,6 +87,9 @@ extern "C" {
       ___has_failed = false;
       ___earlier_unit_test_has_failed = false;
 
+      table_iterator = new std::vector<intrinsic_table>;
+      tables = new std::map<std::string, intrinsic_table>;
+      tables_v = new std::map<std::string, std::vector<intrinsic_table>>;
       // preset the print functions
       intrinsics::set_intrinsic<intrinsics::prints_l>([](const char* cs, uint32_t l) {
             _prints_l(cs, l, eosio::cdt::output_stream_kind::std_out);
