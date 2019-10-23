@@ -760,7 +760,6 @@ class multi_index
 
       const item& load_object_by_primary_iterator( int32_t itr )const {
          using namespace _multi_index_detail;
-         //eosio::print_f("\tload_object_by_primary_iterator(i)\n");
 
 #if 0
          auto itr2 = std::find_if(_items_vector.rbegin(), _items_vector.rend(), [&](const item_ptr& ptr) {
@@ -923,7 +922,6 @@ class multi_index
          }
 
          const_iterator& operator++() {
-            eosio::print_f("\t\toperator++\n");
             eosio::check( _item != nullptr, "cannot increment end iterator" );
 
             uint64_t next_pk;
@@ -1846,7 +1844,6 @@ class multi_index
        *  @endcode
        */
       const_iterator erase( const_iterator itr ) {
-         eosio::print_f("\terase(i)\n");
          eosio::check( itr != end(), "cannot pass end iterator to erase" );
 
          const auto& obj = *itr;
@@ -1890,7 +1887,6 @@ class multi_index
        *  @endcode
        */
       void erase( const T& obj ) {
-         eosio::print_f("\terase(o)\n");
          using namespace _multi_index_detail;
 
          const auto& objitem = static_cast<const item&>(obj);

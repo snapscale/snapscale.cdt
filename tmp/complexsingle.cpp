@@ -22,7 +22,6 @@ class [[eosio::contract]] complexsingle : public contract {
                row.key = pk;
                row.user = user;
             });
-            auto a = addresses.get(pk);
          }
 
       [[eosio::action]]
@@ -33,15 +32,14 @@ class [[eosio::contract]] complexsingle : public contract {
             addresses.modify(itr, get_self(), [&]( auto& row ) {
                row.user = user;
             });
+            auto a = addresses.get(pk);
          }
 
       [[eosio::action]]
          void erase(uint64_t pk) {
-            print_f("\terase(pk)\n");
             address_index addresses( get_self(), get_first_receiver().value);
 
             auto itr = addresses.find(pk);
-            print_f("\terase(pk) - itr: %\n", itr->user);
             check(itr != addresses.end(), "Record does not exist but should");
             addresses.erase(itr);
             itr = addresses.find(pk);
@@ -131,14 +129,12 @@ EOSIO_TEST_BEGIN(complexsingle_test)
    primary_key = 1;
    apply("test"_n.value, "test"_n.value, "modify"_n.value);
 
-   print_f("++++++++++ Apply +++++++++++\n\n");
-   primary_key = 2;
+   primary_key = 1;
    apply("test"_n.value, "test"_n.value, "erase"_n.value);
 
 EOSIO_TEST_END
 
 int main(int argc, char** argv) {
-   print_f("\n\n\n");
    silence_output(false);
    EOSIO_TEST(complexsingle_test);
    return has_failed();
