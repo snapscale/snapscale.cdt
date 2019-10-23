@@ -9,32 +9,20 @@
 
 #pragma once
 
-struct intrinsic_table {
-   intrinsic_table() {
-#if 0
-      eosio::print_f("intrinsic_table default constructor called\n");
-#endif
-   };
+struct intrinsic_row {
+   intrinsic_row() = default;
 
-   intrinsic_table(const intrinsic_table& from){
-      // eosio::print_f("intrinsic_table copy constructor called\n");
-      t_id = from.t_id;
-      primary_key = from.primary_key;
-      value = from.value;
-      buffer_size = from.buffer_size;
-   }
-
-   intrinsic_table(std::string t_id, uint64_t primary_key, const void* val, uint32_t buffer_size):
+   intrinsic_row(std::string t_id, uint64_t primary_key, const void* val, uint32_t buffer_size):
             t_id{ t_id }, primary_key{ primary_key }, buffer_size{ buffer_size} {
       value = std::string((char*)val, buffer_size);
    }
 
-   bool operator ==(intrinsic_table t2) {
-      return t_id == t2.t_id && primary_key == t2.primary_key;
+   bool operator ==(const intrinsic_row r2) const {
+      return t_id == r2.t_id && primary_key == r2.primary_key;
    }
 
-   bool operator <(const intrinsic_table t2) const {
-      return primary_key < t2.primary_key;
+   bool operator <(const intrinsic_row r2) const {
+      return primary_key < r2.primary_key;
    }
 
    uint64_t primary_key;
@@ -44,12 +32,7 @@ struct intrinsic_table {
 };
 
 
-/*
- * TODO:
- * Since the iterator cache depends on getting reset with the apply context/is dependent on `find` being called first,
- * these may need to be wrapped in an object that gets reset in each of the expect(?) functions?
- */
-extern std::vector<intrinsic_table>* table_iterator;
-extern std::map<std::string, intrinsic_table>* tables;
-extern std::map<std::string, std::vector<intrinsic_table>>* tables_v;
+static const intrinsic_row NULLROW{ "", -1, "", 0 };
 
+extern std::map<std::string, std::vector<intrinsic_row>>* key_to_table;
+extern std::map<int32_t, std::vector<intrinsic_row>>* iterator_to_table;
