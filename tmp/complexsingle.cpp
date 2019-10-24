@@ -15,6 +15,7 @@ class [[eosio::contract]] complexsingle : public contract {
 
       [[eosio::action]]
          void insert(uint64_t pk, name user) {
+            eosio::print_f("INSERT\n");
             address_index addresses( get_self(), get_first_receiver().value );
             auto itr = addresses.find(pk);
             check(itr == addresses.end(), "This record already exists");
@@ -26,17 +27,18 @@ class [[eosio::contract]] complexsingle : public contract {
 
       [[eosio::action]]
          void modify(uint64_t pk, name user) {
+            eosio::print_f("MODIFY\n");
             address_index addresses( get_self(), get_first_receiver().value );
             auto itr = addresses.find(pk);
             check(itr != addresses.end(), "This record does not exist");
             addresses.modify(itr, get_self(), [&]( auto& row ) {
                row.user = user;
             });
-            auto a = addresses.get(pk);
          }
 
       [[eosio::action]]
          void erase(uint64_t pk) {
+            eosio::print_f("ERASE\n");
             address_index addresses( get_self(), get_first_receiver().value);
 
             auto itr = addresses.find(pk);
@@ -48,16 +50,13 @@ class [[eosio::contract]] complexsingle : public contract {
 
       [[eosio::action]]
          void move(uint64_t pk) {
+            eosio::print_f("MOVE\n");
             address_index addresses( get_self(), get_first_receiver().value);
 
             auto itr = addresses.begin();
-
             itr++;
             itr++;
             itr--;
-
-            check(itr != addresses.end(), "Record does not exist");
-            addresses.erase(itr);
          }
 
    private:
@@ -70,7 +69,7 @@ class [[eosio::contract]] complexsingle : public contract {
 
 };
 
-EOSIO_DISPATCH(complexsingle, (insert)(modify)(erase))
+EOSIO_DISPATCH(complexsingle, (insert)(modify)(erase)(move))
 
 EOSIO_TEST_BEGIN(complexsingle_test)
    intrinsics::set_intrinsic<intrinsics::read_action_data>(
@@ -128,6 +127,9 @@ EOSIO_TEST_BEGIN(complexsingle_test)
    testnum = 3;
    primary_key = 1;
    apply("test"_n.value, "test"_n.value, "modify"_n.value);
+
+   primary_key = 1;
+   apply("test"_n.value, "test"_n.value, "move"_n.value);
 
    primary_key = 1;
    apply("test"_n.value, "test"_n.value, "erase"_n.value);
