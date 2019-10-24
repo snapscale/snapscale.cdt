@@ -315,10 +315,10 @@ extern "C" {
       int32_t table_key = iterator >> 24;
       int32_t itr  = iterator & 0x00FFFFFF;
 
-      int32_t new_it = ++iterator;
+      int32_t new_it = iterator+1;
 
       auto tbl = (*iterator_to_table)[table_key];
-      auto row = tbl[itr];
+      auto row = tbl[new_it];
 
       // TODO:
       if (new_it == tbl.size()) return tbl.size();
@@ -327,13 +327,19 @@ extern "C" {
       return new_it;
    }
    int32_t db_previous_i64(int32_t iterator, uint64_t* primary) {
-#if 0
-      int32_t new_it = --iterator;
-      if (new_it == table_iterator->size()) return table_iterator->size();
-      auto a = table_iterator->at(iterator);
-      *primary = a.primary_key;
-      return iterator;
-#endif
+      int32_t table_key = iterator >> 24;
+      int32_t itr  = iterator & 0x00FFFFFF;
+
+      int32_t new_it = iterator-1;
+
+      auto tbl = (*iterator_to_table)[table_key];
+      auto row = tbl[itr];
+
+      // TODO:
+      if (new_it < 0) return -1;
+
+      *primary = row.primary_key;
+      return new_it;
    }
    int32_t db_find_i64(capi_name code, uint64_t scope, capi_name table, uint64_t id) {
       std::string key = eosio::name{ code }.to_string() + eosio::name{ scope }.to_string() + eosio::name{ table }.to_string();
@@ -364,47 +370,17 @@ extern "C" {
       return -1;
    }
    int32_t db_lowerbound_i64(capi_name code, uint64_t scope, capi_name table, uint64_t id) {
-#if 0
-      std::string key = eosio::name{ code }.to_string() + eosio::name{ scope }.to_string() + eosio::name{ table }.to_string();
       std::vector<intrinsic_row> to_sort;
+      std::string key = eosio::name{ code }.to_string() + eosio::name{ scope }.to_string() + eosio::name{ table }.to_string();
 
-      auto tbls = tables_v->at(key);
-
-      std::copy(tbls.begin(), tbls.end(), std::back_inserter(to_sort));
-
-
-      std::sort(to_sort.begin(), to_sort.end());
-
-      auto tbls_itr = to_sort.begin();
-
-      intrinsic_row match;
-      while (tbls_itr != to_sort.end()) {
-         if (tbls_itr->primary_key <= id) {
-            match = *tbls_itr;
-            break;
-         }
-
-         ++tbls_itr;
+      auto t = key_to_table->find(key);
+      if (t == key_to_table->end()) {
+         return -1;
       }
 
-      for (int i = 0; i < table_iterator->size(); ++i) {
-         if ((*table_iterator)[i] == match) {
-            return i;
-         }
-      }
-      return -1;
-#endif
-   }
-   int32_t db_upperbound_i64(capi_name code, uint64_t scope, capi_name table, uint64_t id) {
-#if 0
-      std::string key = eosio::name{ code }.to_string() + eosio::name{ scope }.to_string() + eosio::name{ table }.to_string();
-      std::vector<intrinsic_row> to_sort;
+      auto tbl = key_to_table->at(key);
 
-      auto tbls = tables_v->at(key);
-
-      std::copy(tbls.begin(), tbls.end(), std::back_inserter(to_sort));
-
-
+      std::copy(tbl.begin(), tbl.end(), std::back_inserter(to_sort));
       std::sort(to_sort.begin(), to_sort.end());
 
       auto tbls_itr = to_sort.begin();
@@ -419,21 +395,63 @@ extern "C" {
          ++tbls_itr;
       }
 
-      for (int i = 0; i < table_iterator->size(); ++i) {
-         if ((*table_iterator)[i] == match) {
-            return i;
+
+      for(auto const& [key, val] : *iterator_to_table) {
+         for (int i = 0; i < val.size(); ++i) {
+            if (val[i] == match) {
+               return (key << 24) + i;
+            }
          }
       }
       return -1;
-#endif
+   }
+   int32_t db_upperbound_i64(capi_name code, uint64_t scope, capi_name table, uint64_t id) {
+      std::vector<intrinsic_row> to_sort;
+      std::string key = eosio::name{ code }.to_string() + eosio::name{ scope }.to_string() + eosio::name{ table }.to_string();
+
+      auto t = key_to_table->find(key);
+      if (t == key_to_table->end()) {
+         return -1;
+      }
+
+      auto tbl = key_to_table->at(key);
+
+      std::copy(tbl.begin(), tbl.end(), std::back_inserter(to_sort));
+      std::sort(to_sort.begin(), to_sort.end());
+
+      auto tbls_itr = to_sort.begin();
+
+      intrinsic_row match;
+      while (tbls_itr != to_sort.end()) {
+         if (tbls_itr->primary_key <= id) {
+            match = *tbls_itr;
+            break;
+         }
+
+         ++tbls_itr;
+      }
+
+
+      for(auto const& [key, val] : *iterator_to_table) {
+         for (int i = 0; i < val.size(); ++i) {
+            if (val[i] == match) {
+               return (key << 24) + i;
+            }
+         }
+      }
+      return -1;
    }
    int32_t db_end_i64(capi_name code, uint64_t scope, capi_name table) {
-#if 0
       std::string key = eosio::name{ code }.to_string() + eosio::name{ scope }.to_string() + eosio::name{ table }.to_string();
-      return tables_v->at(key).size();
-#endif
-   }
 
+      auto t = key_to_table->find(key);
+      if (t == key_to_table->end()) {
+         return -1;
+      }
+
+      auto tb = key_to_table->at(key);
+      return tb.size();
+   }
 
 
 
