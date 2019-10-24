@@ -1,4 +1,5 @@
 project(examples_native_tester)
 find_package(eosio.cdt)
 add_native_executable(complexsingle complexsingle.cpp)
+add_native_executable(complexmultiple complexmultiple.cpp)
 # add_native_executable(addressbookn2 addressbookn2.cpp)
