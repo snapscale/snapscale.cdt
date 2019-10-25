@@ -926,10 +926,12 @@ class multi_index
 
             uint64_t next_pk;
             auto next_itr = internal_use_do_not_use::db_next_i64( _item->__primary_itr, &next_pk );
-            if( next_itr < 0 )
+            if( next_itr < 0 ) {
                _item = nullptr;
-            else
+            }
+            else {
                _item = &_multidx->load_object_by_primary_iterator( next_itr );
+            }
             return *this;
          }
          const_iterator& operator--() {

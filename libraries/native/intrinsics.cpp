@@ -231,7 +231,8 @@ extern "C" {
       return intrinsics::get().call<intrinsics::db_idx_long_double_previous>(iterator, primary);
    }
 
-
+   static const int SHIFT_FOR_KEY = 24;
+   static const int ITERATOR_MASK = 0x00FFFFFF;
 
    int32_t db_store_i64(uint64_t scope, capi_name table, capi_name payer, uint64_t id,  const void* data, uint32_t len) {
       // TODO: get code from state?
@@ -242,23 +243,22 @@ extern "C" {
 
       auto tbl = key_to_table->find(key);
       if (tbl == key_to_table->end()) {
-         std::vector<intrinsic_row> t;
-         t.push_back(row);
-         (*key_to_table)[key] = t;
+         std::vector<intrinsic_row> tbl;
+         tbl.push_back(row);
+         (*key_to_table)[key] = tbl;
 
          int32_t table_key = iterator_to_table->size()+1;
-         int32_t iter = table_key<<24;
+         int32_t iter = table_key<<SHIFT_FOR_KEY;
 
-         (*iterator_to_table)[table_key] = t;
+         (*iterator_to_table)[table_key] = tbl;
          return iter;
       } else {
-         auto t = (*key_to_table)[key];
-         t.push_back(row);
-         (*key_to_table)[key] = t;
-
+         auto tbl = (*key_to_table)[key];
+         tbl.push_back(row);
+         (*key_to_table)[key] = tbl;
 
          int32_t table_key;
-         auto front = t.front();
+         auto front = tbl.front();
          for(auto const& [key, val] : *iterator_to_table) {
             for (auto const& r : val) {
                if (r == front) {
@@ -266,30 +266,33 @@ extern "C" {
                }
             }
          }
-         (*iterator_to_table)[table_key] = t;
-         return (table_key<<24) + t.size()-1;
+         (*iterator_to_table)[table_key] = tbl;
+         return (table_key<<SHIFT_FOR_KEY) + tbl.size()-1;
       }
 
       return -1;
    }
    void db_update_i64(int32_t iterator, capi_name payer, const void* data, uint32_t len) {
-      int32_t table_key = iterator >> 24;
-      int32_t itr  = iterator & 0x00FFFFFF;
+      int32_t table_key = iterator >> SHIFT_FOR_KEY;
+      int32_t itr  = iterator & ITERATOR_MASK;
 
       auto tbl = (*iterator_to_table)[table_key];
+      auto key = tbl[itr].table_key;
 
       auto row = tbl[itr];
-      row.value = std::string((char*)data, len);
+      row.data = std::string((char*)data, len);
 
       tbl[itr] = row;
       (*iterator_to_table)[table_key] = tbl;
+
+      (*key_to_table)[key][itr] = row;
    }
    void db_remove_i64(int32_t iterator) {
-      int32_t table_key = iterator >> 24;
-      int32_t itr  = iterator & 0x00FFFFFF;
+      int32_t table_key = iterator >> SHIFT_FOR_KEY;
+      int32_t itr  = iterator & ITERATOR_MASK;
 
       auto tbl = (*iterator_to_table)[table_key];
-      auto key = tbl[itr].t_id;
+      auto key = tbl[itr].table_key;
 
       tbl[itr] = NULLROW;
       (*iterator_to_table)[table_key] = tbl;
@@ -297,8 +300,8 @@ extern "C" {
       (*key_to_table)[key][itr] = NULLROW;
    }
    int32_t db_get_i64(int32_t iterator, void* data, uint32_t len) {
-      int32_t table_key = iterator >> 24;
-      int32_t itr  = iterator & 0x00FFFFFF;
+      int32_t table_key = iterator >> SHIFT_FOR_KEY;
+      int32_t itr  = iterator & ITERATOR_MASK;
 
       auto tbl = (*iterator_to_table)[table_key];
       auto row = tbl[itr];
@@ -307,35 +310,44 @@ extern "C" {
       if (len == 0) return s;
 
       auto copy_size = std::min(len, s);
-      memcpy(data, row.value.data(), copy_size);
+      memcpy(data, row.data.data(), copy_size);
 
       return copy_size;
    }
    int32_t db_next_i64(int32_t iterator, uint64_t* primary) {
-      int32_t table_key = iterator >> 24;
-      int32_t itr  = iterator & 0x00FFFFFF;
+      int32_t table_key = iterator >> SHIFT_FOR_KEY;
+      int32_t itr  = iterator & ITERATOR_MASK;
 
       int32_t new_it = iterator+1;
+#if 0
+      prints("\t\t\titr: ");
+      printui(itr);
+      prints("\n");
+      prints("\t\t\tnew_it: ");
+      printui(new_it);
+      prints("\n");
+#endif
 
       auto tbl = (*iterator_to_table)[table_key];
+      // prints("\t\t\ttbl.size(): ");
+      // printui(tbl.size());
+      // prints("\n");
+      if (itr+1 == tbl.size()) return -1;
+      // prints("\t\t\tshouldn't be here\n");
+
       auto row = tbl[new_it];
-
-      // TODO:
-      if (new_it == tbl.size()) return tbl.size();
-
       *primary = row.primary_key;
       return new_it;
    }
    int32_t db_previous_i64(int32_t iterator, uint64_t* primary) {
-      int32_t table_key = iterator >> 24;
-      int32_t itr  = iterator & 0x00FFFFFF;
+      int32_t table_key = iterator >> SHIFT_FOR_KEY;
+      int32_t itr  = iterator & ITERATOR_MASK;
 
       int32_t new_it = iterator-1;
 
       auto tbl = (*iterator_to_table)[table_key];
       auto row = tbl[itr];
 
-      // TODO:
       if (new_it < 0) return -1;
 
       *primary = row.primary_key;
@@ -362,7 +374,7 @@ extern "C" {
       for(auto const& [key, val] : *iterator_to_table) {
          for (int i = 0; i < val.size(); ++i) {
             if (val[i] == match) {
-               return (key << 24) + i;
+               return (key << SHIFT_FOR_KEY) + i;
             }
          }
       }
@@ -399,7 +411,7 @@ extern "C" {
       for(auto const& [key, val] : *iterator_to_table) {
          for (int i = 0; i < val.size(); ++i) {
             if (val[i] == match) {
-               return (key << 24) + i;
+               return (key << SHIFT_FOR_KEY) + i;
             }
          }
       }
@@ -435,7 +447,7 @@ extern "C" {
       for(auto const& [key, val] : *iterator_to_table) {
          for (int i = 0; i < val.size(); ++i) {
             if (val[i] == match) {
-               return (key << 24) + i;
+               return (key << SHIFT_FOR_KEY) + i;
             }
          }
       }
