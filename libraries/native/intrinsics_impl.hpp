@@ -12,13 +12,13 @@
 struct intrinsic_row {
    intrinsic_row() = default;
 
-   intrinsic_row(std::string t_id, uint64_t primary_key, const void* val, uint32_t buffer_size):
-            t_id{ t_id }, primary_key{ primary_key }, buffer_size{ buffer_size} {
-      value = std::string((char*)val, buffer_size);
+   intrinsic_row(std::string table_key, uint64_t primary_key, const void* buffer, uint32_t buffer_size):
+            table_key{ table_key }, primary_key{ primary_key }, buffer_size{ buffer_size} {
+      data = std::string((char*)buffer, buffer_size);
    }
 
    bool operator ==(const intrinsic_row r2) const {
-      return t_id == r2.t_id && primary_key == r2.primary_key;
+      return table_key == r2.table_key && primary_key == r2.primary_key;
    }
 
    bool operator <(const intrinsic_row r2) const {
@@ -27,8 +27,8 @@ struct intrinsic_row {
 
    uint64_t primary_key;
    uint32_t buffer_size;
-   std::string t_id;
-   std::string value;
+   std::string table_key;
+   std::string data;
 };
 
 
