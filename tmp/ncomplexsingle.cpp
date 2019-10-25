@@ -7,11 +7,11 @@ using namespace eosio::native;
 int testnum = 0;
 int primary_key = 0;
 
-class [[eosio::contract]] complexsingle : public contract {
+class [[eosio::contract]] ncomplexsingle : public contract {
    public:
       using contract::contract;
 
-      complexsingle(name receiver, name code,  datastream<const char*> ds): contract(receiver, code, ds) {}
+      ncomplexsingle(name receiver, name code,  datastream<const char*> ds): contract(receiver, code, ds) {}
 
       [[eosio::action]]
          void insert(uint64_t pk, name user) {
@@ -54,9 +54,52 @@ class [[eosio::contract]] complexsingle : public contract {
             address_index addresses( get_self(), get_first_receiver().value);
 
             auto itr = addresses.begin();
+            eosio::print_f("iter %\n", itr->user);
             itr++;
+            eosio::print_f("iter %\n", itr->user);
             itr++;
+            eosio::print_f("iter %\n", itr->user);
             itr--;
+            eosio::print_f("iter %\n", itr->user);
+            itr--;
+            eosio::print_f("iter %\n", itr->user);
+            itr--;
+            eosio::print_f("iter %\n", itr->user);
+         }
+
+      [[eosio::action]]
+         void erase2(uint64_t pk) {
+            eosio::print_f("ERASE2 --- ");
+            address_index addresses( get_self(), get_first_receiver().value);
+
+            auto itr = addresses.end();
+            itr--;
+            eosio::print_f("iter % %--- ", itr->user, itr->key);
+            addresses.erase(itr);
+         }
+
+      [[eosio::action]]
+         void erase3(uint64_t pk) {
+            eosio::print_f("ERASE3 --- \n");
+            address_index addresses( get_self(), get_first_receiver().value);
+
+            auto itr = addresses.begin();
+            eosio::print_f("iter %\n", itr->user);
+            itr++;
+            eosio::print_f("iter %\n", itr->user);
+            addresses.erase(itr);
+            itr++;
+            eosio::print_f("iter %\n", itr->user);
+            itr--;
+            eosio::print_f("iter %\n", itr->user);
+#if 0
+            auto itr = addresses.begin();
+            eosio::print_f("iter %__\n", itr->user);
+            itr = addresses.erase(itr);
+            eosio::print_f("iter %__\n", itr->user);
+            itr++;
+            eosio::print_f("iter %__\n", itr->user);
+#endif 
          }
 
    private:
@@ -69,9 +112,9 @@ class [[eosio::contract]] complexsingle : public contract {
 
 };
 
-EOSIO_DISPATCH(complexsingle, (insert)(modify)(erase)(move))
+EOSIO_DISPATCH(ncomplexsingle, (insert)(modify)(erase)(erase2)(erase3)(move))
 
-EOSIO_TEST_BEGIN(complexsingle_test)
+EOSIO_TEST_BEGIN(ncomplexsingle_test)
    intrinsics::set_intrinsic<intrinsics::read_action_data>(
       [](void* m, uint32_t len) {
          check(len <= 2*sizeof(eosio::name), "failed from read_action_data");
@@ -128,16 +171,25 @@ EOSIO_TEST_BEGIN(complexsingle_test)
    primary_key = 1;
    apply("test"_n.value, "test"_n.value, "modify"_n.value);
 
+   testnum = 3;
+   primary_key = 1;
+   apply("test"_n.value, "test"_n.value, "erase3"_n.value);
+#if 0
    primary_key = 1;
    apply("test"_n.value, "test"_n.value, "move"_n.value);
 
    primary_key = 1;
    apply("test"_n.value, "test"_n.value, "erase"_n.value);
 
+   testnum = 3;
+   primary_key = 1;
+   apply("test"_n.value, "test"_n.value, "erase2"_n.value);
+#endif
+
 EOSIO_TEST_END
 
 int main(int argc, char** argv) {
    silence_output(false);
-   EOSIO_TEST(complexsingle_test);
+   EOSIO_TEST(ncomplexsingle_test);
    return has_failed();
 }

@@ -7,11 +7,11 @@ using namespace eosio::native;
 int testnum = 0;
 int primary_key = 0;
 
-class [[eosio::contract]] complexmultiple : public contract {
+class [[eosio::contract]] ncomplexmultiple : public contract {
    public:
       using contract::contract;
 
-      complexmultiple(name receiver, name code,  datastream<const char*> ds): contract(receiver, code, ds) {}
+      ncomplexmultiple(name receiver, name code,  datastream<const char*> ds): contract(receiver, code, ds) {}
 
       [[eosio::action]]
          void insert(uint64_t pk, name user) {
@@ -100,9 +100,9 @@ class [[eosio::contract]] complexmultiple : public contract {
 
 };
 
-EOSIO_DISPATCH(complexmultiple, (insert)(modify)(erase)(move))
+EOSIO_DISPATCH(ncomplexmultiple, (insert)(modify)(erase)(move))
 
-EOSIO_TEST_BEGIN(complexmultiple_test)
+EOSIO_TEST_BEGIN(ncomplexmultiple_test)
    intrinsics::set_intrinsic<intrinsics::read_action_data>(
       [](void* m, uint32_t len) {
          check(len <= 2*sizeof(eosio::name), "failed from read_action_data");
@@ -169,6 +169,6 @@ EOSIO_TEST_END
 
 int main(int argc, char** argv) {
    silence_output(false);
-   EOSIO_TEST(complexmultiple_test);
+   EOSIO_TEST(ncomplexmultiple_test);
    return has_failed();
 }
