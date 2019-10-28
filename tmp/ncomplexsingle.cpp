@@ -54,52 +54,41 @@ class [[eosio::contract]] ncomplexsingle : public contract {
             address_index addresses( get_self(), get_first_receiver().value);
 
             auto itr = addresses.begin();
-            eosio::print_f("iter %\n", itr->user);
             itr++;
-            eosio::print_f("iter %\n", itr->user);
             itr++;
-            eosio::print_f("iter %\n", itr->user);
             itr--;
-            eosio::print_f("iter %\n", itr->user);
             itr--;
-            eosio::print_f("iter %\n", itr->user);
             itr--;
-            eosio::print_f("iter %\n", itr->user);
+         }
+
+      [[eosio::action]]
+         void move2(uint64_t pk) {
+            eosio::print_f("MOVE2\n");
+            address_index addresses( get_self(), get_first_receiver().value);
+
+            auto& obj = addresses.get(1);
+            auto itr = addresses.iterator_to(obj);
          }
 
       [[eosio::action]]
          void erase2(uint64_t pk) {
-            eosio::print_f("ERASE2 --- ");
+            eosio::print_f("ERASE2\n");
             address_index addresses( get_self(), get_first_receiver().value);
 
             auto itr = addresses.end();
             itr--;
-            eosio::print_f("iter % %--- ", itr->user, itr->key);
             addresses.erase(itr);
          }
 
       [[eosio::action]]
          void erase3(uint64_t pk) {
-            eosio::print_f("ERASE3 --- \n");
+            eosio::print_f("ERASE3\n");
             address_index addresses( get_self(), get_first_receiver().value);
 
             auto itr = addresses.begin();
-            eosio::print_f("iter %\n", itr->user);
             itr++;
-            eosio::print_f("iter %\n", itr->user);
+            itr++;
             addresses.erase(itr);
-            itr++;
-            eosio::print_f("iter %\n", itr->user);
-            itr--;
-            eosio::print_f("iter %\n", itr->user);
-#if 0
-            auto itr = addresses.begin();
-            eosio::print_f("iter %__\n", itr->user);
-            itr = addresses.erase(itr);
-            eosio::print_f("iter %__\n", itr->user);
-            itr++;
-            eosio::print_f("iter %__\n", itr->user);
-#endif 
          }
 
    private:
@@ -112,7 +101,7 @@ class [[eosio::contract]] ncomplexsingle : public contract {
 
 };
 
-EOSIO_DISPATCH(ncomplexsingle, (insert)(modify)(erase)(erase2)(erase3)(move))
+EOSIO_DISPATCH(ncomplexsingle, (insert)(modify)(erase)(erase2)(erase3)(move)(move2))
 
 EOSIO_TEST_BEGIN(ncomplexsingle_test)
    intrinsics::set_intrinsic<intrinsics::read_action_data>(
@@ -171,6 +160,8 @@ EOSIO_TEST_BEGIN(ncomplexsingle_test)
    primary_key = 1;
    apply("test"_n.value, "test"_n.value, "modify"_n.value);
 
+   primary_key = 1;
+   apply("test"_n.value, "test"_n.value, "move2"_n.value);
    testnum = 3;
    primary_key = 1;
    apply("test"_n.value, "test"_n.value, "erase3"_n.value);

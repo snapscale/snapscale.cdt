@@ -1849,6 +1849,7 @@ class multi_index
          eosio::check( itr != end(), "cannot pass end iterator to erase" );
 
          const auto& obj = *itr;
+
          ++itr;
 
          erase(obj);
