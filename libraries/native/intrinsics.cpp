@@ -319,21 +319,9 @@ extern "C" {
       int32_t itr  = iterator & ITERATOR_MASK;
 
       int32_t new_it = iterator+1;
-#if 0
-      prints("\t\t\titr: ");
-      printui(itr);
-      prints("\n");
-      prints("\t\t\tnew_it: ");
-      printui(new_it);
-      prints("\n");
-#endif
 
       auto tbl = (*iterator_to_table)[table_key];
-      // prints("\t\t\ttbl.size(): ");
-      // printui(tbl.size());
-      // prints("\n");
       if (itr+1 == tbl.size()) return -1;
-      // prints("\t\t\tshouldn't be here\n");
 
       auto row = tbl[new_it];
       *primary = row.primary_key;

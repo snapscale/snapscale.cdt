@@ -63,6 +63,17 @@ class [[eosio::contract]] wcomplexsingle : public contract {
          }
 
       [[eosio::action]]
+         void move2(uint64_t pk) {
+            eosio::print_f("MOVE");
+            address_index addresses( get_self(), get_first_receiver().value);
+
+            auto obj = addresses.get(1);
+            eosio::print_f("--- obj %", obj.user);
+            auto itr = addresses.iterator_to(obj);
+            eosio::print_f("--- iter %", itr->user);
+         }
+
+      [[eosio::action]]
          void erase2(uint64_t pk) {
             eosio::print_f("ERASE2 --- ");
             address_index addresses( get_self(), get_first_receiver().value);
@@ -108,4 +119,4 @@ class [[eosio::contract]] wcomplexsingle : public contract {
 
 };
 
-EOSIO_DISPATCH(wcomplexsingle, (insert)(modify)(erase)(erase2)(erase3)(move))
+EOSIO_DISPATCH(wcomplexsingle, (insert)(modify)(erase)(erase2)(erase3)(move)(move2))
