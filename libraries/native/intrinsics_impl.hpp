@@ -12,8 +12,8 @@
 struct intrinsic_row {
    intrinsic_row() = default;
 
-   intrinsic_row(std::string table_key, uint64_t primary_key, const void* buffer, uint32_t buffer_size):
-            table_key{ table_key }, primary_key{ primary_key }, buffer_size{ buffer_size} {
+   intrinsic_row(std::string table_key, uint64_t primary_key, const void* buffer, uint32_t buffer_size, uint64_t secondary_key = 0):
+            table_key{ table_key }, primary_key{ primary_key }, buffer_size{ buffer_size}, secondary_key{ secondary_key } {
       data = std::string((char*)buffer, buffer_size);
    }
 
@@ -25,14 +25,23 @@ struct intrinsic_row {
       return primary_key < r2.primary_key;
    }
 
-   uint64_t primary_key;
-   uint32_t buffer_size;
    std::string table_key;
+
    std::string data;
+   uint32_t buffer_size;
+
+   uint64_t primary_key;
+
+   uint64_t secondary_key;
 };
 
 
 static const intrinsic_row NULLROW{ "", -1, "", 0 };
 
+// Primary Key
 extern std::map<std::string, std::vector<intrinsic_row>>* key_to_table;
 extern std::map<int32_t, std::vector<intrinsic_row>>* iterator_to_table;
+
+// Secondary Key
+extern std::map<int32_t, std::vector<intrinsic_row>>* secondary_iterator_to_table;
+
