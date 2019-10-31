@@ -20,6 +20,7 @@ set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-everything -allow-sse")
 if(__APPLE)
   add_definitions(-D__APPLE__)
 endif()
+set(CMAKE_BUILD_TYPE "Release")
 
 file(GLOB HEADERS "${CMAKE_CURRENT_SOURCE_DIR}/musl/include/*.h"
                   "${CMAKE_CURRENT_SOURCE_DIR}/musl/src/internal/*.h"
