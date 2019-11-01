@@ -15,7 +15,7 @@ class [[eosio::contract]] ncomplexsingle : public contract {
 
       [[eosio::action]]
          void insert(uint64_t pk, name user, uint64_t secondary) {
-            eosio::print_f("\n\nINSERT\n");
+            eosio::print_f("INSERT\n");
             address_index addresses( get_self(), get_first_receiver().value );
             auto itr = addresses.find(pk);
             check(itr == addresses.end(), "This record already exists");
@@ -28,7 +28,7 @@ class [[eosio::contract]] ncomplexsingle : public contract {
 
       [[eosio::action]]
          void get(uint64_t pk) {
-            eosio::print_f("\n\nGET\n");
+            eosio::print_f("GET\n");
             address_index addresses( get_self(), get_first_receiver().value );
 
             auto sec = addresses.get_index<name("secondary")>();
@@ -41,7 +41,7 @@ class [[eosio::contract]] ncomplexsingle : public contract {
 
       [[eosio::action]]
          void modify(uint64_t pk, name user) {
-            eosio::print_f("\n\nMODIFY\n");
+            eosio::print_f("MODIFY\n");
             address_index addresses( get_self(), get_first_receiver().value );
             auto itr = addresses.find(pk);
             check(itr != addresses.end(), "This record does not exist");
@@ -52,30 +52,24 @@ class [[eosio::contract]] ncomplexsingle : public contract {
 
       [[eosio::action]]
          void move(uint64_t pk) {
-            eosio::print_f("\n\nMOVE\n");
+            eosio::print_f("MOVE\n");
             address_index addresses( get_self(), get_first_receiver().value );
 
             auto sec = addresses.get_index<name("secondary")>();
 
             auto sitr = sec.find(9);
             auto send = sec.end();
-            eosio::print_f("sitr %\n", sitr->key);
 
             sitr--;
-            eosio::print_f("-- %\n", sitr->key);
             sitr++;
-            eosio::print_f("++ %\n", sitr->key);
             sitr++;
-            eosio::print_f("++ %\n", sitr->key);
             sitr--;
-            eosio::print_f("-- %\n", sitr->key);
             sitr++;
-            eosio::print_f("++ %\n", sitr->key);
          }
 
       [[eosio::action]]
          void erase(uint64_t pk) {
-            eosio::print_f("\n\nERASE\n");
+            eosio::print_f("ERASE\n");
             address_index addresses( get_self(), get_first_receiver().value);
             auto sec = addresses.get_index<name("secondary")>();
             auto sitr = sec.find(9);

@@ -81,7 +81,6 @@ extern "C" {
    static const int ITERATOR_MASK = 0x00FFFFFF;
 
    int32_t db_idx64_store(uint64_t scope, capi_name table, capi_name payer, uint64_t id, const uint64_t* secondary) {
-      prints("DB_IDX64_STORE\n");
       capi_name code = eosio::name { "test" }.value;
       std::string key = eosio::name{ code }.to_string() + eosio::name{ scope }.to_string() + eosio::name{ table }.to_string();
 
@@ -101,42 +100,15 @@ extern "C" {
 
       return -1;
    }
-   // TODO:
    void db_idx64_remove(int32_t iterator) {
-      prints("DB_IDX64_REMOVE\n");
-      int32_t table_key = iterator >> SHIFT_FOR_KEY;
-      int32_t itr  = iterator & ITERATOR_MASK;
-
-      prints("itr: ");
-      printi(itr);
-      prints("\n");
-
-      auto tbl = (*iterator_to_table)[table_key];
-      auto row = tbl[itr];
-      auto key = row.table_key;
-
-      prints("size: ");
-      printi(tbl.size());
-      prints("\n");
-      prints("table_key: ");
-      prints(key.c_str());
-      prints("\n");
-      prints("secondary_key: ");
-      printi(row.secondary_key);
-      prints("\n");
-
-      tbl[itr] = NULLROW;
-      (*iterator_to_table)[table_key] = tbl;
-
-      (*key_to_table)[key][itr] = NULLROW;
+      // In naive implementation this is a no-op.
+      return;
    }
    void db_idx64_update(int32_t iterator, capi_name payer, const uint64_t* secondary) {
-      prints("TODO: DB_IDX64_UPDATE\n");
-      // Since we don't track the payer, this is a no-op.
+      // In naive implementation this is a no-op.
       return;
    }
    int32_t db_idx64_find_primary(capi_name code, uint64_t scope, capi_name table, uint64_t* secondary, uint64_t primary) {
-      prints("DB_IDX64_FIND_PRIMARY\n");
       std::string key = eosio::name{ code }.to_string() + eosio::name{ scope }.to_string() + eosio::name{ table }.to_string();
 
       auto t = key_to_table->find(key);
@@ -167,9 +139,8 @@ extern "C" {
 
       return -1;
    }
-   // TODO:
+   // TODO: This isn't even used by multi_index??
    int32_t db_idx64_find_secondary(capi_name code, uint64_t scope, capi_name table, const uint64_t* secondary, uint64_t* primary) {
-      prints("DB_IDX64_FIND_SECONDARY\n");
       std::string key = eosio::name{ code }.to_string() + eosio::name{ scope }.to_string() + eosio::name{ table }.to_string();
 
       auto t = key_to_table->find(key);
@@ -200,7 +171,6 @@ extern "C" {
       return -1;
    }
    int32_t db_idx64_lowerbound(capi_name code, uint64_t scope, capi_name table, uint64_t* secondary, uint64_t* primary) {
-      prints("DB_IDX64_LOWERBOUND\n");
       std::vector<intrinsic_row> to_sort;
       std::string key = eosio::name{ code }.to_string() + eosio::name{ scope }.to_string() + eosio::name{ table }.to_string();
 
@@ -241,7 +211,6 @@ extern "C" {
       return -1;
    }
    int32_t db_idx64_upperbound(capi_name code, uint64_t scope, capi_name table, uint64_t* secondary, uint64_t* primary) {
-      prints("DB_IDX64_UPPERBOUND\n");
       std::vector<intrinsic_row> to_sort;
       std::string key = eosio::name{ code }.to_string() + eosio::name{ scope }.to_string() + eosio::name{ table }.to_string();
 
@@ -292,13 +261,9 @@ extern "C" {
 
       auto tb = key_to_table->at(key);
       auto s = tb.size();
-      prints("size: ");
-      printi(s);
-      prints("\n");
       return s;
    }
    int32_t db_idx64_next(int32_t iterator, uint64_t* primary) {
-      prints("DB_IDX64_NEXT\n");
       int32_t table_key = iterator >> SHIFT_FOR_KEY;
       int32_t itr  = iterator & ITERATOR_MASK;
 
@@ -312,7 +277,6 @@ extern "C" {
       return iterator + 1;
    }
    int32_t db_idx64_previous(int32_t iterator, uint64_t* primary) {
-      prints("DB_IDX64_PREVIOUS\n");
       int32_t table_key = iterator >> SHIFT_FOR_KEY;
       int32_t itr  = iterator & ITERATOR_MASK;
 

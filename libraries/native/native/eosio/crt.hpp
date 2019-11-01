@@ -8,9 +8,7 @@ namespace eosio { namespace cdt {
       none
    };
    struct output_stream {
-      // static const int MAX_OUTPUT = 1024*2;
-      // TODO: This is temporary for print debugging
-      static const int MAX_OUTPUT = 1024*8;
+      static const int MAX_OUTPUT = 1024*2;
       char output[MAX_OUTPUT];
       size_t index = 0;
       std::string to_string()const { return std::string((const char*)output, index); }
