@@ -35,6 +35,8 @@ struct intrinsic_row {
    uint64_t secondary_key;
 };
 
+struct secondary_index {};
+
 
 static const eosio::name TESTING_CODE = eosio::name{ "test" };
 static const intrinsic_row NULLROW{ "", -1, "", 0 };
@@ -44,5 +46,5 @@ extern std::map<std::string, std::vector<intrinsic_row>>* key_to_table;
 extern std::map<int32_t, std::vector<intrinsic_row>>* iterator_to_table;
 
 // Secondary Key
-extern std::map<int32_t, std::vector<intrinsic_row>>* secondary_iterator_to_table;
+extern std::map<int32_t, std::vector<secondary_index>>* key_to_secondary;
 

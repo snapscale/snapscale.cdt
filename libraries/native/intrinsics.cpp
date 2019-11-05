@@ -79,10 +79,24 @@ extern "C" {
 
    static const int SHIFT_FOR_KEY = 24;
    static const int ITERATOR_MASK = 0x00FFFFFF;
+   static const int TABLE_MASK = 0x0000000F;
 
    int32_t db_idx64_store(uint64_t scope, capi_name table, capi_name payer, uint64_t id, const uint64_t* secondary) {
+      prints("db_idx64_store\n");
       capi_name code = eosio::name { "test" }.value;
       std::string key = eosio::name{ code }.to_string() + eosio::name{ scope }.to_string() + eosio::name{ table }.to_string();
+
+      prints("table_key_num: ");
+      printui(table);
+      prints("\n");
+
+      prints("table_key: ");
+      prints(key.c_str());
+      prints("\n");
+
+      prints("bits? ");
+      printui(table & TABLE_MASK);
+      prints("\n");
 
       auto t = key_to_table->find(key);
       if (t == key_to_table->end()) {
@@ -356,7 +370,20 @@ extern "C" {
    }
 
    int32_t db_idx_double_store(uint64_t scope, capi_name table, capi_name payer, uint64_t id, const double* secondary) {
-      return intrinsics::get().call<intrinsics::db_idx_double_store>(scope, table, payer, id, secondary);
+      prints("db_idx_double_store\n");
+      capi_name code = eosio::name { "test" }.value;
+
+      capi_name t = table & 0xFFFFFFFC;
+      std::string key = eosio::name{ code }.to_string() + eosio::name{ scope }.to_string() + eosio::name{ t }.to_string();
+
+      prints("table_key: ");
+      prints(key.c_str());
+      prints("\n");
+
+      prints("bits? ");
+      printui(table & TABLE_MASK);
+      prints("\n");
+      return 0;
    }
    void db_idx_double_remove(int32_t iterator) {
       return intrinsics::get().call<intrinsics::db_idx_double_remove>(iterator);

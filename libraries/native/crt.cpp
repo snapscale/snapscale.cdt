@@ -14,6 +14,8 @@ eosio::cdt::output_stream std_err;
 std::map<std::string, std::vector<intrinsic_row>>* key_to_table;
 std::map<int32_t, std::vector<intrinsic_row>>* iterator_to_table;
 
+std::map<int32_t, std::vector<secondary_index>>* key_to_secondary;
+
 extern "C" {
    int main(int, char**);
    char* _mmap();
@@ -88,6 +90,8 @@ extern "C" {
 
       key_to_table = new std::map<std::string, std::vector<intrinsic_row>>;
       iterator_to_table = new std::map<int32_t, std::vector<intrinsic_row>>;
+
+      key_to_secondary = new std::map<int32_t, std::vector<secondary_index>>;
 
       // preset the print functions
       intrinsics::set_intrinsic<intrinsics::prints_l>([](const char* cs, uint32_t l) {
