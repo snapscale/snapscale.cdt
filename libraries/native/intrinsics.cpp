@@ -421,9 +421,7 @@ extern "C" {
 
 
    int32_t db_store_i64(uint64_t scope, capi_name table, capi_name payer, uint64_t id,  const void* data, uint32_t len) {
-      // TODO: get code from state?
-      capi_name code = eosio::name { "test" }.value;
-      std::string key = eosio::name{ code }.to_string() + eosio::name{ scope }.to_string() + eosio::name{ table }.to_string();
+      std::string key = TESTING_CODE.to_string() + eosio::name{ scope }.to_string() + eosio::name{ table }.to_string();
 
       intrinsic_row row{ key, id, data, len };
 

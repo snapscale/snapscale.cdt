@@ -36,6 +36,7 @@ struct intrinsic_row {
 };
 
 
+static const eosio::name TESTING_CODE = eosio::name{ "test" };
 static const intrinsic_row NULLROW{ "", -1, "", 0 };
 
 // Primary Key
