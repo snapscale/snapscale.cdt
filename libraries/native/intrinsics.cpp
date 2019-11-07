@@ -222,35 +222,42 @@ extern "C" {
       if (t == key_to_secondary_indexes->end()) {
          return -1;
       }
-#if 0
-      std::vector<intrinsic_row> to_sort;
-      std::string key = eosio::name{ code }.to_string() + eosio::name{ scope }.to_string() + eosio::name{ table }.to_string();
 
-      auto t = key_to_table->find(key);
-      if (t == key_to_table->end()) {
-         return -1;
-      }
+      uint64_t index = table_name_to_index(table);
+      auto& idx = (*key_to_secondary_indexes)[key][index];
 
-      auto& tbl = key_to_table->at(key);
+      std::vector<secondary_index_row> to_sort;
 
-      std::copy(tbl.begin(), tbl.end(), std::back_inserter(to_sort));
+      std::copy(idx.rows.begin(), idx.rows.end(), std::back_inserter(to_sort));
 
-      auto cmp = [](intrinsic_row a, intrinsic_row b) { return a.secondary_key < b.secondary_key; };
+      auto cmp = [](secondary_index_row a, secondary_index_row b) { return a.val.idx64 < b.val.idx64; };
       std::sort(to_sort.begin(), to_sort.end(), cmp);
 
-      auto tbls_itr = to_sort.begin();
+      auto row_itr = to_sort.begin();
 
-      intrinsic_row match;
-      while (tbls_itr != to_sort.end()) {
-         if (tbls_itr->secondary_key >= *secondary) {
-            *primary = tbls_itr->primary_key;
-            match = *tbls_itr;
+      secondary_index_row match;
+      while (row_itr != to_sort.end()) {
+         if (row_itr->val.idx64 >= *secondary) {
+            *primary = row_itr->primary_key;
+            match = *row_itr;
             break;
          }
 
-         ++tbls_itr;
+         ++row_itr;
       }
 
+
+      /*
+      for(auto const& [key, val] : *iterator_to_table) {
+         for (int i = 0; i < val.size(); ++i) {
+            if (val[i] == match) {
+               auto k = (key << SHIFT_FOR_KEY) + i;
+               return k;
+            }
+         }
+      }
+      */
+#if 0
 
       for(auto const& [key, val] : *iterator_to_table) {
          for (int i = 0; i < val.size(); ++i) {
