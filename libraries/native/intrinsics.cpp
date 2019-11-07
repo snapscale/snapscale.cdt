@@ -257,17 +257,6 @@ extern "C" {
          }
       }
       */
-#if 0
-
-      for(auto const& [key, val] : *iterator_to_table) {
-         for (int i = 0; i < val.size(); ++i) {
-            if (val[i] == match) {
-               auto k = (key << SHIFT_FOR_KEY) + i;
-               return k;
-            }
-         }
-      }
-#endif
       return -1;
    }
    int32_t db_idx64_upperbound(capi_name code, uint64_t scope, capi_name table, uint64_t* secondary, uint64_t* primary) {
