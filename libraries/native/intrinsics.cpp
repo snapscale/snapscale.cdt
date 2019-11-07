@@ -98,16 +98,15 @@ extern "C" {
    int32_t get_iterator(int32_t itr) {
       return itr & ITERATOR_MASK;
    }
-   std::string normalize_table_name(capi_name table) {
-      return eosio::name{ table }.to_string();
-   }
    uint64_t table_name_to_index(uint64_t table_name) {
       return table_name & TABLE_MASK;
+   }
+   std::string normalize_table_name(capi_name table) {
+      return eosio::name{ table & 0xFFFFFFFFFFFFFFF0 }.to_string();
    }
 
    int32_t db_idx64_store(uint64_t scope, capi_name table, capi_name payer, uint64_t id, const uint64_t* secondary) {
       std::string key = TESTING_CODE.to_string() + eosio::name{ scope }.to_string() + normalize_table_name(table);
-
       uint64_t index = table_name_to_index(table);
 
       int32_t table_key;
@@ -123,9 +122,9 @@ extern "C" {
       auto& idxs = key_to_secondary_indexes->at(key);
       auto& idx = idxs[index];
 
-      idx.rows.push_back(secondary_index_row{*secondary, id});
+      idx.rows.push_back(secondary_index_row{idx64, *secondary, id});
 
-      (*iterator_to_secondary_indexes)[table_key][index].rows.push_back(secondary_index_row{*secondary, id});
+      (*iterator_to_secondary_indexes)[table_key][index].rows.push_back(secondary_index_row{idx64, *secondary, id});
 
       return table_key_to_iterator(table_key) + index_to_iterator(index) + idx.rows.size() - 1;
    }
@@ -152,67 +151,49 @@ extern "C" {
       return;
    }
    int32_t db_idx64_find_primary(capi_name code, uint64_t scope, capi_name table, uint64_t* secondary, uint64_t primary) {
-#if 0
-      std::string key = eosio::name{ code }.to_string() + eosio::name{ scope }.to_string() + eosio::name{ table }.to_string();
+      std::string key = TESTING_CODE.to_string() + eosio::name{ scope }.to_string() + normalize_table_name(table);
+      uint64_t index = table_name_to_index(table);
 
-      auto t = key_to_table->find(key);
-      if (t == key_to_table->end()) {
+      auto t = key_to_secondary_indexes->find(key);
+      if (t == key_to_secondary_indexes->end()) {
          return -1;
       }
 
-      auto tbl = key_to_table->at(key);
+      auto& idxs = key_to_secondary_indexes->at(key);
+      auto& idx = idxs[index];
 
-      intrinsic_row match;
-      for (const auto& row : tbl) {
+      for (int i = 0; i < idx.rows.size(); ++i) {
+         auto& row = idx.rows[i];
          if (row.primary_key == primary) {
-            match = row;
-            break;
+            *secondary = row.val.idx64;
+            int32_t table_key = table_key_to_iterator((*key_to_iterator_secondary)[key]); // TODO: Not confident this works
+            return table_key + index_to_iterator(index) + i;
          }
       }
 
-      for(auto const& [key, val] : *iterator_to_table) {
-         for (int i = 0; i < val.size(); ++i) {
-            auto& r = val[i];
-            if (r == match) {
-               *secondary = r.secondary_key;
-               auto k = (key << SHIFT_FOR_KEY) + i;
-               return k;
-            }
-         }
-      }
-#endif
       return -1;
    }
    int32_t db_idx64_find_secondary(capi_name code, uint64_t scope, capi_name table, const uint64_t* secondary, uint64_t* primary) {
-#if 0
-      std::string key = eosio::name{ code }.to_string() + eosio::name{ scope }.to_string() + eosio::name{ table }.to_string();
+      std::string key = TESTING_CODE.to_string() + eosio::name{ scope }.to_string() + normalize_table_name(table);
+      uint64_t index = table_name_to_index(table);
 
-      auto t = key_to_table->find(key);
-      if (t == key_to_table->end()) {
+      auto t = key_to_secondary_indexes->find(key);
+      if (t == key_to_secondary_indexes->end()) {
          return -1;
       }
 
-      auto tbl = key_to_table->at(key);
+      auto& idxs = key_to_secondary_indexes->at(key);
+      auto& idx = idxs[index];
 
-      intrinsic_row match;
-      for (const auto& row : tbl) {
-         if (row.secondary_key == *secondary) {
-            match = row;
-            break;
+      for (int i = 0; i < idx.rows.size(); ++i) {
+         auto& row = idx.rows[i];
+         if (row.val.idx64 == *secondary) {
+            *primary = row.primary_key;
+            int32_t table_key = table_key_to_iterator((*key_to_iterator_secondary)[key]); // TODO: Not confident this works
+            return table_key + index_to_iterator(index) + i;
          }
       }
 
-      for(auto const& [key, val] : *iterator_to_table) {
-         for (int i = 0; i < val.size(); ++i) {
-            auto& r = val[i];
-            if (r == match) {
-               *primary = r.primary_key;
-               return (key << SHIFT_FOR_KEY) + i;
-            }
-         }
-      }
-
-#endif
       return -1;
    }
    int32_t db_idx64_lowerbound(capi_name code, uint64_t scope, capi_name table, uint64_t* secondary, uint64_t* primary) {
@@ -246,59 +227,57 @@ extern "C" {
          ++row_itr;
       }
 
-
-      /*
-      for(auto const& [key, val] : *iterator_to_table) {
-         for (int i = 0; i < val.size(); ++i) {
-            if (val[i] == match) {
-               auto k = (key << SHIFT_FOR_KEY) + i;
-               return k;
-            }
+      auto& idxs = key_to_secondary_indexes->at(key);
+      idx = idxs[index];
+      for (int i = 0; i < idx.rows.size(); ++i) {
+         auto& row = idx.rows[i];
+         if (row == match) {
+            int32_t table_key = table_key_to_iterator((*key_to_iterator_secondary)[key]); // TODO: Not confident this works
+            return table_key + index_to_iterator(index) + i;
          }
       }
-      */
+
       return -1;
    }
    int32_t db_idx64_upperbound(capi_name code, uint64_t scope, capi_name table, uint64_t* secondary, uint64_t* primary) {
-#if 0
-      std::vector<intrinsic_row> to_sort;
-      std::string key = eosio::name{ code }.to_string() + eosio::name{ scope }.to_string() + eosio::name{ table }.to_string();
+      std::string key = TESTING_CODE.to_string() + eosio::name{ scope }.to_string() + normalize_table_name(table);
 
-      auto t = key_to_table->find(key);
-      if (t == key_to_table->end()) {
+      auto t = key_to_secondary_indexes->find(key);
+      if (t == key_to_secondary_indexes->end()) {
          return -1;
       }
 
-      auto& tbl = key_to_table->at(key);
+      uint64_t index = table_name_to_index(table);
+      auto& idx = (*key_to_secondary_indexes)[key][index];
 
-      std::copy(tbl.begin(), tbl.end(), std::back_inserter(to_sort));
+      std::vector<secondary_index_row> to_sort;
 
-      auto cmp = [](intrinsic_row a, intrinsic_row b) { return a.secondary_key < b.secondary_key; };
-      std::sort(to_sort.begin(), to_sort.end(), cmp);
+      std::copy(idx.rows.begin(), idx.rows.end(), std::back_inserter(to_sort));
+      std::sort(to_sort.begin(), to_sort.end());
 
-      auto tbls_itr = to_sort.begin();
+      auto row_itr = to_sort.begin();
 
-      intrinsic_row match;
-      while (tbls_itr != to_sort.end()) {
-         if (tbls_itr->secondary_key <= *secondary) {
-            *primary = tbls_itr->primary_key;
-            match = *tbls_itr;
+      secondary_index_row match;
+      while (row_itr != to_sort.end()) {
+         if (row_itr->val.idx64 <= *secondary) {
+            *primary = row_itr->primary_key;
+            match = *row_itr;
             break;
          }
 
-         ++tbls_itr;
+         ++row_itr;
       }
 
-
-      for(auto const& [key, val] : *iterator_to_table) {
-         for (int i = 0; i < val.size(); ++i) {
-            if (val[i] == match) {
-               auto k = (key << SHIFT_FOR_KEY) + i;
-               return k;
-            }
+      auto& idxs = key_to_secondary_indexes->at(key);
+      idx = idxs[index];
+      for (int i = 0; i < idx.rows.size(); ++i) {
+         auto& row = idx.rows[i];
+         if (row == match) {
+            int32_t table_key = table_key_to_iterator((*key_to_iterator_secondary)[key]); // TODO: Not confident this works
+            return table_key + index_to_iterator(index) + i;
          }
       }
-#endif
+
       return -1;
    }
    int32_t db_idx64_end(capi_name code, uint64_t scope, capi_name table) {

@@ -35,19 +35,59 @@ struct intrinsic_row {
 union secondary_index_union {
    uint64_t idx64;
    uint128_t idx128;
+   uint128_t idx256; // TODO:??
 
    double idxdouble;
    long double idxlongdouble;
 
-   uint128_t idx256; // TODO:??
 };
+
+enum secondary_index_type { empty, idx64, idx128, idx256, idxdouble, idxlongdouble };
 
 struct secondary_index_row {
+   secondary_index_type tag;
    secondary_index_union val;
    uint64_t primary_key;
+
+   bool operator ==(const secondary_index_row r2) const {
+      if (tag != r2.tag) return false;
+      if (primary_key != r2.primary_key) return false;
+
+      switch(tag) {
+         case idx64:
+            return val.idx64 == r2.val.idx64;
+         case idx128:
+            return val.idx128 == r2.val.idx128;
+         case idx256:
+            return val.idx256 == r2.val.idx256;
+         case idxdouble:
+            return val.idxdouble == r2.val.idxdouble;
+         case idxlongdouble:
+            return val.idxlongdouble == r2.val.idxlongdouble;
+         default:
+            return false;
+      }
+
+   }
+
+   bool operator <(const secondary_index_row r2) const {
+      switch(tag) {
+         case idx64:
+            return val.idx64 < r2.val.idx64;
+         case idx128:
+            return val.idx128 < r2.val.idx128;
+         case idx256:
+            return val.idx256 < r2.val.idx256;
+         case idxdouble:
+            return val.idxdouble < r2.val.idxdouble;
+         case idxlongdouble:
+            return val.idxlongdouble < r2.val.idxlongdouble;
+         default:
+            return false;
+      }
+   }
 };
 
-enum secondary_index_type { empty, idx64, idx128, idxdouble, idxlongdouble, idx256 };
 struct secondary_index {
    secondary_index_type tag;
    std::vector<secondary_index_row> rows;
