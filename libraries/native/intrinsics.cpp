@@ -106,55 +106,65 @@ extern "C" {
    }
 
    int32_t db_idx64_store(uint64_t scope, capi_name table, capi_name payer, uint64_t id, const uint64_t* secondary) {
-      std::string key = TESTING_CODE.to_string() + eosio::name{ scope }.to_string() + normalize_table_name(table);
-      uint64_t index = table_name_to_index(table);
+      #if 0
+         std::string key = TESTING_CODE.to_string() + eosio::name{ scope }.to_string() + normalize_table_name(table);
+         uint64_t index = table_name_to_index(table);
 
-      int32_t table_key;
-      auto t = key_to_secondary_indexes->find(key);
-      if (t == key_to_secondary_indexes->end()) {
-         (*key_to_secondary_indexes)[key][index] = secondary_index{idx64, std::vector<secondary_index_row>(), key};
-         table_key = iterator_to_secondary_indexes->size()+1;
-         (*key_to_iterator_secondary)[key] = table_key;
-         (*iterator_to_key_secondary)[table_key] = key;
-         (*iterator_to_secondary_indexes)[table_key][index] = secondary_index{idx64, std::vector<secondary_index_row>(), key};
-      } else {
-         table_key = (*key_to_iterator_secondary)[key];
-      }
+         int32_t table_key;
+         auto t = key_to_secondary_indexes->find(key);
+         if (t == key_to_secondary_indexes->end()) {
+            table_key = iterator_to_secondary_indexes->size()+1;
+            (*key_to_secondary_indexes)[key][index] = secondary_index{idx64, std::vector<secondary_index_row>(), key};
+            (*iterator_to_secondary_indexes)[table_key][index] = secondary_index{idx64, std::vector<secondary_index_row>(), key};
 
-      auto& idxs = key_to_secondary_indexes->at(key);
-      auto& idx = idxs[index];
+            (*key_to_iterator_secondary)[key] = table_key;
+            (*iterator_to_key_secondary)[table_key] = key;
+         } else {
+            table_key = (*key_to_iterator_secondary)[key];
+         }
 
-      idx.rows.push_back(secondary_index_row{idx64, *secondary, id});
+         auto& idxs = key_to_secondary_indexes->at(key);
+         auto& idx = idxs[index];
 
-      (*iterator_to_secondary_indexes)[table_key][index].rows.push_back(secondary_index_row{idx64, *secondary, id});
+         idx.rows.push_back(secondary_index_row{idx64, *secondary, id});
 
-      return table_key_to_iterator(table_key) + index_to_iterator(index) + idx.rows.size() - 1;
+         (*iterator_to_secondary_indexes)[table_key][index].rows.push_back(secondary_index_row{idx64, *secondary, id});
+
+         return table_key_to_iterator(table_key) + index_to_iterator(index) + idx.rows.size() - 1;
+      #endif
+      return sidx_store_idx64.store(scope, table, payer, id, secondary);
    }
    void db_idx64_remove(int32_t iterator) {
-      int32_t table_key = iterator_to_table_key(iterator);
-      int32_t index = iterator_to_index(iterator);
-      int32_t itr = get_iterator(iterator);
+      #if 0
+         int32_t table_key = iterator_to_table_key(iterator);
+         int32_t index = iterator_to_index(iterator);
+         int32_t itr = get_iterator(iterator);
 
-      auto& tbl = (*iterator_to_secondary_indexes)[table_key];
-      auto& idx = tbl[index];
-      idx.rows[itr] = SNULLROW; 
+         auto& tbl = (*iterator_to_secondary_indexes)[table_key];
+         auto& idx = tbl[index];
+         idx.rows[itr] = SNULLROW; 
 
-      auto key = (*iterator_to_key_secondary)[table_key];
-      (*key_to_secondary_indexes)[key][index] = idx;
-      return;
+         auto key = (*iterator_to_key_secondary)[table_key];
+         (*key_to_secondary_indexes)[key][index] = idx;
+         return;
+      #endif
+      return sidx_store_idx64.remove(iterator);
    }
    void db_idx64_update(int32_t iterator, capi_name payer, const uint64_t* secondary) {
-      int32_t table_key = iterator_to_table_key(iterator);
-      int32_t index = iterator_to_index(iterator);
-      int32_t itr = get_iterator(iterator);
+      #if 0
+         int32_t table_key = iterator_to_table_key(iterator);
+         int32_t index = iterator_to_index(iterator);
+         int32_t itr = get_iterator(iterator);
 
-      auto& tbl = (*iterator_to_secondary_indexes)[table_key];
-      auto& idx = tbl[index];
-      idx.rows[itr].val.idx64 = *secondary;
+         auto& tbl = (*iterator_to_secondary_indexes)[table_key];
+         auto& idx = tbl[index];
+         idx.rows[itr].val.idx64 = *secondary;
 
-      auto key = (*iterator_to_key_secondary)[table_key];
-      (*key_to_secondary_indexes)[key][index] = idx;
-      return;
+         auto key = (*iterator_to_key_secondary)[table_key];
+         (*key_to_secondary_indexes)[key][index] = idx;
+         return;
+      #endif
+      return sidx_store_idx64.update(iterator, payer, secondary);
    }
    int32_t db_idx64_find_primary(capi_name code, uint64_t scope, capi_name table, uint64_t* secondary, uint64_t primary) {
       std::string key = TESTING_CODE.to_string() + eosio::name{ scope }.to_string() + normalize_table_name(table);
@@ -172,7 +182,8 @@ extern "C" {
          auto& row = idx.rows[i];
          if (row.primary_key == primary) {
             *secondary = row.val.idx64;
-            int32_t table_key = table_key_to_iterator((*key_to_iterator_secondary)[key]); // TODO: Not confident this works
+            // TODO: Not confident this works
+            int32_t table_key = table_key_to_iterator((*key_to_iterator_secondary)[key]);
             return table_key + index_to_iterator(index) + i;
          }
       }
@@ -195,7 +206,8 @@ extern "C" {
          auto& row = idx.rows[i];
          if (row.val.idx64 == *secondary) {
             *primary = row.primary_key;
-            int32_t table_key = table_key_to_iterator((*key_to_iterator_secondary)[key]); // TODO: Not confident this works
+            // TODO: Not confident this works
+            int32_t table_key = table_key_to_iterator((*key_to_iterator_secondary)[key]);
             return table_key + index_to_iterator(index) + i;
          }
       }
@@ -280,7 +292,8 @@ extern "C" {
       for (int i = 0; i < idx.rows.size(); ++i) {
          auto& row = idx.rows[i];
          if (row == match) {
-            int32_t table_key = table_key_to_iterator((*key_to_iterator_secondary)[key]); // TODO: Not confident this works
+            // TODO: Not confident this works
+            int32_t table_key = table_key_to_iterator((*key_to_iterator_secondary)[key]);
             return table_key + index_to_iterator(index) + i;
          }
       }
