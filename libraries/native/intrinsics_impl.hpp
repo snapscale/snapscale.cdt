@@ -35,7 +35,8 @@ struct intrinsic_row {
 union secondary_index_union {
    uint64_t idx64;
    uint128_t idx128;
-   uint128_t idx256; // TODO:??
+   // TODO:??
+   uint128_t idx256;
 
    double idxdouble;
    long double idxlongdouble;
@@ -98,12 +99,19 @@ struct secondary_index {
 static const eosio::name TESTING_CODE = eosio::name{ "test" };
 static const intrinsic_row NULLROW{ "", -1, "", 0 };
 
+static const secondary_index_row SNULLROW{ empty, 0, -1 };
+
+
+
 // Primary Index
 extern std::map<std::string, std::vector<intrinsic_row>>* key_to_table;
 extern std::map<int32_t, std::vector<intrinsic_row>>* iterator_to_table;
+
+
 
 // Secondary Indexes
 extern std::map<std::string, secondary_index[16]>* key_to_secondary_indexes;
 extern std::map<int32_t, secondary_index[16]>* iterator_to_secondary_indexes;
 
 extern std::map<std::string, int32_t>* key_to_iterator_secondary;
+extern std::map<int32_t, std::string>* iterator_to_key_secondary;

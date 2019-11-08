@@ -115,6 +115,8 @@ extern "C" {
          (*key_to_secondary_indexes)[key][index] = secondary_index{idx64, std::vector<secondary_index_row>(), key};
          table_key = iterator_to_secondary_indexes->size()+1;
          (*key_to_iterator_secondary)[key] = table_key;
+         (*iterator_to_key_secondary)[table_key] = key;
+         (*iterator_to_secondary_indexes)[table_key][index] = secondary_index{idx64, std::vector<secondary_index_row>(), key};
       } else {
          table_key = (*key_to_iterator_secondary)[key];
       }
@@ -135,7 +137,10 @@ extern "C" {
 
       auto& tbl = (*iterator_to_secondary_indexes)[table_key];
       auto& idx = tbl[index];
-      auto& row = idx.rows[itr]; // TODO: Delete?
+      idx.rows[itr] = SNULLROW; 
+
+      auto key = (*iterator_to_key_secondary)[table_key];
+      (*key_to_secondary_indexes)[key][index] = idx;
       return;
    }
    void db_idx64_update(int32_t iterator, capi_name payer, const uint64_t* secondary) {
@@ -145,9 +150,10 @@ extern "C" {
 
       auto& tbl = (*iterator_to_secondary_indexes)[table_key];
       auto& idx = tbl[index];
-      auto& row = idx.rows[itr];
+      idx.rows[itr].val.idx64 = *secondary;
 
-      row.val.idx64 = *secondary;
+      auto key = (*iterator_to_key_secondary)[table_key];
+      (*key_to_secondary_indexes)[key][index] = idx;
       return;
    }
    int32_t db_idx64_find_primary(capi_name code, uint64_t scope, capi_name table, uint64_t* secondary, uint64_t primary) {
@@ -232,7 +238,8 @@ extern "C" {
       for (int i = 0; i < idx.rows.size(); ++i) {
          auto& row = idx.rows[i];
          if (row == match) {
-            int32_t table_key = table_key_to_iterator((*key_to_iterator_secondary)[key]); // TODO: Not confident this works
+            // TODO: Not confident this works
+            int32_t table_key = table_key_to_iterator((*key_to_iterator_secondary)[key]);
             return table_key + index_to_iterator(index) + i;
          }
       }

@@ -73,10 +73,12 @@ class [[eosio::contract]] ncomplexsingle : public contract {
             eosio::print_f("ERASE\n");
             address_index addresses( get_self(), get_first_receiver().value);
             auto sec = addresses.get_index<name("secondary1")>();
+            eosio::print_f("ERASE: Find 1\n");
             auto sitr = sec.find(9);
 
             check(sitr != sec.end(), "Record does not exist but should");
             sec.erase(sitr);
+            eosio::print_f("ERASE: Find 2\n");
             sitr = sec.find(9);
             check(sitr == sec.end(), "Record exists when it shouldn't");
          }
@@ -119,16 +121,13 @@ class [[eosio::contract]] ncomplexsingle : public contract {
          name user;
          uint64_t secondary1;
          uint64_t secondary2;
-         // double secondary3;
          uint64_t primary_key() const { return key; }
          uint64_t by_secondary_1() const { return secondary1; }
          uint64_t by_secondary_2() const { return secondary2; }
-         // double by_secondary_3() const { return secondary3; }
       };
       typedef eosio::multi_index<"people"_n, person,
          indexed_by<name("secondary1"), const_mem_fun<person, uint64_t, &person::by_secondary_1>>,
          indexed_by<name("secondary2"), const_mem_fun<person, uint64_t, &person::by_secondary_2>>
-         // indexed_by<name("secondary3"), const_mem_fun<person, double, &person::by_secondary_3>>
       > address_index;
 
 };
@@ -194,7 +193,6 @@ EOSIO_TEST_BEGIN(ncomplexsingle_test)
    primary_key = 3;
    apply("test"_n.value, "test"_n.value, "insert"_n.value);
 
-#if 0
    primary_key = 2;
    apply("test"_n.value, "test"_n.value, "get"_n.value);
 
@@ -209,6 +207,7 @@ EOSIO_TEST_BEGIN(ncomplexsingle_test)
    primary_key = 1;
    apply("test"_n.value, "test"_n.value, "erase"_n.value);
 
+#if 0
    primary_key = 1;
    apply("test"_n.value, "test"_n.value, "move"_n.value);
 
