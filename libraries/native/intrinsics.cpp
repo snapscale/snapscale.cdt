@@ -167,28 +167,31 @@ extern "C" {
       return sidx_store_idx64.update(iterator, payer, secondary);
    }
    int32_t db_idx64_find_primary(capi_name code, uint64_t scope, capi_name table, uint64_t* secondary, uint64_t primary) {
-      std::string key = TESTING_CODE.to_string() + eosio::name{ scope }.to_string() + normalize_table_name(table);
-      uint64_t index = table_name_to_index(table);
+      #if 0
+         std::string key = TESTING_CODE.to_string() + eosio::name{ scope }.to_string() + normalize_table_name(table);
+         uint64_t index = table_name_to_index(table);
 
-      auto t = key_to_secondary_indexes->find(key);
-      if (t == key_to_secondary_indexes->end()) {
-         return -1;
-      }
-
-      auto& idxs = key_to_secondary_indexes->at(key);
-      auto& idx = idxs[index];
-
-      for (int i = 0; i < idx.rows.size(); ++i) {
-         auto& row = idx.rows[i];
-         if (row.primary_key == primary) {
-            *secondary = row.val.idx64;
-            // TODO: Not confident this works
-            int32_t table_key = table_key_to_iterator((*key_to_iterator_secondary)[key]);
-            return table_key + index_to_iterator(index) + i;
+         auto t = key_to_secondary_indexes->find(key);
+         if (t == key_to_secondary_indexes->end()) {
+            return -1;
          }
-      }
 
-      return -1;
+         auto& idxs = key_to_secondary_indexes->at(key);
+         auto& idx = idxs[index];
+
+         for (int i = 0; i < idx.rows.size(); ++i) {
+            auto& row = idx.rows[i];
+            if (row.primary_key == primary) {
+               *secondary = row.val.idx64;
+               // TODO: Not confident this works
+               int32_t table_key = table_key_to_iterator((*key_to_iterator_secondary)[key]);
+               return table_key + index_to_iterator(index) + i;
+            }
+         }
+
+         return -1;
+      #endif
+      return sidx_store_idx64.find_primary(code, scope, table, secondary, primary);
    }
    int32_t db_idx64_find_secondary(capi_name code, uint64_t scope, capi_name table, const uint64_t* secondary, uint64_t* primary) {
       std::string key = TESTING_CODE.to_string() + eosio::name{ scope }.to_string() + normalize_table_name(table);
