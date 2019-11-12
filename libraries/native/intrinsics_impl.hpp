@@ -117,8 +117,20 @@ extern std::map<std::string, int32_t>* key_to_iterator_secondary;
 extern std::map<int32_t, std::string>* iterator_to_key_secondary;
 
 
+/*
+template<typename ObjectType,
+            typename SecondaryKeyProxy = typename std::add_lvalue_reference<ObjectType>::type,
+            typename SecondaryKeyProxyConst = typename std::add_lvalue_reference<typename std::add_const<ObjectType>::type>::type
+         >
+class generic_index {
+   std::vector<ObjectType> rows;
+   std::string table_key;
+};
 
-
+extern generic_index<uint64_t> gi_64;
+typedef std::array<uint128_t, 2> key256_t;
+extern generic_index<key256_t, uint128_t*, const uint128_t*> gi_256;
+*/
 
 
 
@@ -212,7 +224,8 @@ struct secondary_index_store {
 
       auto& tbl = iterator_to_secondary_indexes[table_key];
       auto& idx = tbl[index];
-      idx.rows[itr].val.Idx = *secondary; // TODO
+      // TODO
+      idx.rows[itr].val.Idx = *secondary;
 
       auto key = iterator_to_key_secondary[table_key];
       key_to_secondary_indexes[key][index] = idx;
@@ -234,7 +247,8 @@ struct secondary_index_store {
       for (int i = 0; i < idx.rows.size(); ++i) {
          auto& row = idx.rows[i];
          if (row.primary_key == primary) {
-            *secondary = row.val.Idx; // TODO:
+            // TODO:
+            *secondary = row.val.Idx;
             // TODO: Not confident this works
             int32_t table_key = table_key_to_iterator(key_to_iterator_secondary[key]);
             return table_key + index_to_iterator(index) + i;
