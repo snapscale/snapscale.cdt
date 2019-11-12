@@ -20,7 +20,7 @@ std::map<int32_t, secondary_index[16]>* iterator_to_secondary_indexes;
 std::map<std::string, int32_t>* key_to_iterator_secondary;
 std::map<int32_t, std::string>* iterator_to_key_secondary;
 
-secondary_index_store<uint64_t, idx64> sidx_store_idx64;
+secondary_index_store secondary_indexes;
 
 extern "C" {
    int main(int, char**);
