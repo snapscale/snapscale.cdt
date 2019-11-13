@@ -132,7 +132,7 @@ extern "C" {
 
          return table_key_to_iterator(table_key) + index_to_iterator(index) + idx.rows.size() - 1;
       #endif
-      return secondary_indexes.store<uint64_t, idx64>(scope, table, payer, id, secondary);
+      return secondary_indexes->store<uint64_t, idx64>(scope, table, payer, id, secondary);
    }
    void db_idx64_remove(int32_t iterator) {
       #if 0
@@ -148,7 +148,7 @@ extern "C" {
          (*key_to_secondary_indexes)[key][index] = idx;
          return;
       #endif
-      return secondary_indexes.remove(iterator);
+      return secondary_indexes->remove(iterator);
    }
    void db_idx64_update(int32_t iterator, capi_name payer, const uint64_t* secondary) {
       #if 0
@@ -164,7 +164,7 @@ extern "C" {
          (*key_to_secondary_indexes)[key][index] = idx;
          return;
       #endif
-      return secondary_indexes.update<uint64_t, idx64>(iterator, payer, secondary);
+      return secondary_indexes->update<uint64_t, idx64>(iterator, payer, secondary);
    }
    int32_t db_idx64_find_primary(capi_name code, uint64_t scope, capi_name table, uint64_t* secondary, uint64_t primary) {
       #if 0
@@ -191,7 +191,7 @@ extern "C" {
 
          return -1;
       #endif
-      return secondary_indexes.find_primary<uint64_t, idx64>(code, scope, table, secondary, primary);
+      return secondary_indexes->find_primary<uint64_t, idx64>(code, scope, table, secondary, primary);
    }
    int32_t db_idx64_find_secondary(capi_name code, uint64_t scope, capi_name table, const uint64_t* secondary, uint64_t* primary) {
       #if 0
@@ -218,7 +218,7 @@ extern "C" {
 
          return -1;
       #endif
-      return secondary_indexes.find_secondary<uint64_t, idx64>(code, scope, table, secondary, primary);
+      return secondary_indexes->find_secondary<uint64_t, idx64>(code, scope, table, secondary, primary);
    }
    int32_t db_idx64_lowerbound(capi_name code, uint64_t scope, capi_name table, uint64_t* secondary, uint64_t* primary) {
       #if 0
@@ -265,7 +265,7 @@ extern "C" {
 
          return -1;
       #endif
-      return secondary_indexes.lowerbound<uint64_t, idx64>(code, scope, table, secondary, primary);
+      return secondary_indexes->lowerbound<uint64_t, idx64>(code, scope, table, secondary, primary);
    }
    int32_t db_idx64_upperbound(capi_name code, uint64_t scope, capi_name table, uint64_t* secondary, uint64_t* primary) {
       #if 0
@@ -310,7 +310,7 @@ extern "C" {
 
          return -1;
       #endif
-      return secondary_indexes.upperbound<uint64_t, idx64>(code, scope, table, secondary, primary);
+      return secondary_indexes->upperbound<uint64_t, idx64>(code, scope, table, secondary, primary);
    }
    int32_t db_idx64_end(capi_name code, uint64_t scope, capi_name table) {
       #if 0
@@ -325,7 +325,7 @@ extern "C" {
 
          return (*key_to_secondary_indexes)[key][index].rows.size();
       #endif
-      return secondary_indexes.end(code, scope, table);
+      return secondary_indexes->end(code, scope, table);
    }
    int32_t db_idx64_next(int32_t iterator, uint64_t* primary) {
       #if 0
@@ -341,7 +341,7 @@ extern "C" {
          *primary = idx.rows[new_it].primary_key;
          return iterator+1;
       #endif
-      return secondary_indexes.next(iterator, primary);
+      return secondary_indexes->next(iterator, primary);
    }
    int32_t db_idx64_previous(int32_t iterator, uint64_t* primary) {
       #if 0
@@ -357,7 +357,7 @@ extern "C" {
          *primary = idx.rows[new_it].primary_key;
          return iterator-1;
       #endif
-      return secondary_indexes.previous(iterator, primary);
+      return secondary_indexes->previous(iterator, primary);
    }
 
 
@@ -425,34 +425,34 @@ extern "C" {
    }
 
    int32_t db_idx_double_store(uint64_t scope, capi_name table, capi_name payer, uint64_t id, const double* secondary) {
-      return secondary_indexes.store<double, idxdouble>(scope, table, payer, id, secondary);
+      return secondary_indexes->store<double, idxdouble>(scope, table, payer, id, secondary);
    }
    void db_idx_double_remove(int32_t iterator) {
-      return secondary_indexes.remove(iterator);
+      return secondary_indexes->remove(iterator);
    }
    void db_idx_double_update(int32_t iterator, capi_name payer, const double* secondary) {
-      return secondary_indexes.update<double, idxdouble>(iterator, payer, secondary);
+      return secondary_indexes->update<double, idxdouble>(iterator, payer, secondary);
    }
    int32_t db_idx_double_find_primary(capi_name code, uint64_t scope, capi_name table, double* secondary, uint64_t primary) {
-      return secondary_indexes.find_primary<double, idxdouble>(code, scope, table, secondary, primary);
+      return secondary_indexes->find_primary<double, idxdouble>(code, scope, table, secondary, primary);
    }
    int32_t db_idx_double_find_secondary(capi_name code, uint64_t scope, capi_name table, const double* secondary, uint64_t* primary) {
-      return secondary_indexes.find_secondary<double, idxdouble>(code, scope, table, secondary, primary);
+      return secondary_indexes->find_secondary<double, idxdouble>(code, scope, table, secondary, primary);
    }
    int32_t db_idx_double_lowerbound(capi_name code, uint64_t scope, capi_name table, double* secondary, uint64_t* primary) {
-      return secondary_indexes.lowerbound<double, idxdouble>(code, scope, table, secondary, primary);
+      return secondary_indexes->lowerbound<double, idxdouble>(code, scope, table, secondary, primary);
    }
    int32_t db_idx_double_upperbound(capi_name code, uint64_t scope, capi_name table, double* secondary, uint64_t* primary) {
-      return secondary_indexes.upperbound<double, idxdouble>(code, scope, table, secondary, primary);
+      return secondary_indexes->upperbound<double, idxdouble>(code, scope, table, secondary, primary);
    }
    int32_t db_idx_double_end(capi_name code, uint64_t scope, capi_name table) {
-      return secondary_indexes.end(code, scope, table);
+      return secondary_indexes->end(code, scope, table);
    }
    int32_t db_idx_double_next(int32_t iterator, uint64_t* primary) {
-      return secondary_indexes.next(iterator, primary);
+      return secondary_indexes->next(iterator, primary);
    }
    int32_t db_idx_double_previous(int32_t iterator, uint64_t* primary) {
-      return secondary_indexes.previous(iterator, primary);
+      return secondary_indexes->previous(iterator, primary);
    }
 
    int32_t db_idx_long_double_store(uint64_t scope, capi_name table, capi_name payer, uint64_t id, const long double* secondary) {

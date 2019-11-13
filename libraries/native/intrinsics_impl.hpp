@@ -430,4 +430,4 @@ struct secondary_index_store {
 
 };
 
-extern secondary_index_store secondary_indexes;
+extern secondary_index_store* secondary_indexes;
