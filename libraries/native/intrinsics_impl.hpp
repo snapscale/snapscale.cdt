@@ -9,6 +9,7 @@
 
 #pragma once
 
+
 struct intrinsic_row {
    intrinsic_row() = default;
 
@@ -32,18 +33,24 @@ struct intrinsic_row {
    uint32_t buffer_size;
 };
 
+struct idx256_t {
+   std::array<uint128_t, 2> v;
+   bool operator ==(const idx256_t i2) const {
+      return v == i2.v;
+   }
+};
+
 union secondary_index_union {
    uint64_t idx64;
    uint128_t idx128;
-   // TODO:??
-   // uint128_t idx256;
+   idx256_t idx256;
 
    double idxdouble;
    long double idxlongdouble;
 
 };
 
-enum secondary_index_type { empty, idx64, idx128, /*idx256,*/ idxdouble, idxlongdouble };
+enum secondary_index_type { empty, idx64, idx128, idx256, idxdouble, idxlongdouble };
 
 struct secondary_index_row {
    secondary_index_type tag;
@@ -59,10 +66,8 @@ struct secondary_index_row {
             return val.idx64 == r2.val.idx64;
          case idx128:
             return val.idx128 == r2.val.idx128;
-            /*
          case idx256:
             return val.idx256 == r2.val.idx256;
-            */
          case idxdouble:
             return val.idxdouble == r2.val.idxdouble;
          case idxlongdouble:
@@ -99,17 +104,10 @@ struct secondary_index {
    std::string table_key;
 };
 
-
 static const eosio::name TESTING_CODE = eosio::name{ "test" };
 static const intrinsic_row NULLROW{ "", -1, "", 0 };
 
 static const secondary_index_row SNULLROW{ empty, 0, -1 };
-
-
-
-// Primary Index
-extern std::map<std::string, std::vector<intrinsic_row>>* key_to_table;
-extern std::map<int32_t, std::vector<intrinsic_row>>* iterator_to_table;
 
 template <typename T>
 T& selectMember(secondary_index_union& u)
@@ -118,10 +116,8 @@ T& selectMember(secondary_index_union& u)
 }
 
 struct secondary_index_store {
-   secondary_index indexes[16];
-
-   std::map<std::string, secondary_index[16]> key_to_secondary_indexes;
-   std::map<int32_t, secondary_index[16]> iterator_to_secondary_indexes;
+   std::map<std::string, std::array<secondary_index, 16>> key_to_secondary_indexes;
+   std::map<int32_t, std::array<secondary_index, 16>> iterator_to_secondary_indexes;
 
    std::map<std::string, int32_t> key_to_iterator_secondary;
    std::map<int32_t, std::string> iterator_to_key_secondary;
@@ -192,14 +188,12 @@ struct secondary_index_store {
    }
 
 
-   template <typename T, secondary_index_type Idx>
+   template <typename T>
    void update(int32_t iterator, uint64_t payer, const T* secondary) {
       auto [table_key, index, itr] = unpack_iterator(iterator);
 
       auto& tbl = iterator_to_secondary_indexes[table_key];
       auto& idx = tbl[index];
-      // TODO
-      // idx.rows[itr].val.Idx = *secondary;
       selectMember<T>(idx.rows[itr].val) = *secondary;
 
       auto key = iterator_to_key_secondary[table_key];
@@ -207,7 +201,7 @@ struct secondary_index_store {
       return;
    }
 
-   template <typename T, secondary_index_type Idx>
+   template <typename T>
    int32_t find_primary(uint64_t code, uint64_t scope, uint64_t table, T* secondary, uint64_t primary) {
       std::string key = TESTING_CODE.to_string() + eosio::name{ scope }.to_string() + normalize_table_name(table);
       uint64_t index = table_name_to_index(table);
@@ -223,8 +217,6 @@ struct secondary_index_store {
       for (int i = 0; i < idx.rows.size(); ++i) {
          auto& row = idx.rows[i];
          if (row.primary_key == primary) {
-            // TODO:
-            // *secondary = row.val.Idx;
             *secondary = selectMember<T>(row.val);
             int32_t table_key = table_key_to_iterator(key_to_iterator_secondary[key]);
             return table_key + index_to_iterator(index) + i;
@@ -234,7 +226,7 @@ struct secondary_index_store {
       return -1;
    }
 
-   template <typename T, secondary_index_type Idx>
+   template <typename T>
    int32_t find_secondary(capi_name code, uint64_t scope, capi_name table, const T* secondary, uint64_t* primary) {
       std::string key = TESTING_CODE.to_string() + eosio::name{ scope }.to_string() + normalize_table_name(table);
       uint64_t index = table_name_to_index(table);
@@ -251,7 +243,6 @@ struct secondary_index_store {
          auto& row = idx.rows[i];
          if (selectMember<T>(row.val)== *secondary) {
             *primary = row.primary_key;
-            // TODO: Not confident this works
             int32_t table_key = table_key_to_iterator(key_to_iterator_secondary[key]);
             return table_key + index_to_iterator(index) + i;
          }
@@ -260,7 +251,7 @@ struct secondary_index_store {
       return -1;
    }
 
-   template <typename T, secondary_index_type Idx>
+   template <typename T>
    int32_t lowerbound(capi_name code, uint64_t scope, capi_name table, T* secondary, uint64_t* primary) {
       std::string key = TESTING_CODE.to_string() + eosio::name{ scope }.to_string() + normalize_table_name(table);
 
@@ -305,7 +296,7 @@ struct secondary_index_store {
       return -1;
    }
 
-   template <typename T, secondary_index_type Idx>
+   template <typename T>
    int32_t upperbound(capi_name code, uint64_t scope, capi_name table, T* secondary, uint64_t* primary) {
       std::string key = TESTING_CODE.to_string() + eosio::name{ scope }.to_string() + normalize_table_name(table);
 
@@ -340,7 +331,6 @@ struct secondary_index_store {
       for (int i = 0; i < idx.rows.size(); ++i) {
          auto& row = idx.rows[i];
          if (row == match) {
-            // TODO: Not confident this works
             int32_t table_key = table_key_to_iterator(key_to_iterator_secondary[key]);
             return table_key + index_to_iterator(index) + i;
          }
@@ -405,4 +395,9 @@ struct secondary_index_store {
 
 };
 
+// Primary Index
+extern std::map<std::string, std::vector<intrinsic_row>>* key_to_table;
+extern std::map<int32_t, std::vector<intrinsic_row>>* iterator_to_table;
+
+// Secondary Index
 extern secondary_index_store* secondary_indexes;
