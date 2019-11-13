@@ -111,31 +111,6 @@ static const secondary_index_row SNULLROW{ empty, 0, -1 };
 extern std::map<std::string, std::vector<intrinsic_row>>* key_to_table;
 extern std::map<int32_t, std::vector<intrinsic_row>>* iterator_to_table;
 
-
-
-// Secondary Indexes
-extern std::map<std::string, secondary_index[16]>* key_to_secondary_indexes;
-extern std::map<int32_t, secondary_index[16]>* iterator_to_secondary_indexes;
-
-extern std::map<std::string, int32_t>* key_to_iterator_secondary;
-extern std::map<int32_t, std::string>* iterator_to_key_secondary;
-
-
-/*
-template<typename ObjectType,
-            typename SecondaryKeyProxy = typename std::add_lvalue_reference<ObjectType>::type,
-            typename SecondaryKeyProxyConst = typename std::add_lvalue_reference<typename std::add_const<ObjectType>::type>::type
-         >
-class generic_index {
-   std::vector<ObjectType> rows;
-   std::string table_key;
-};
-
-extern generic_index<uint64_t> gi_64;
-typedef std::array<uint128_t, 2> key256_t;
-extern generic_index<key256_t, uint128_t*, const uint128_t*> gi_256;
-*/
-
 template <typename T>
 T& selectMember(secondary_index_union& u)
 {

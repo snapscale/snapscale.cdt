@@ -14,12 +14,6 @@ eosio::cdt::output_stream std_err;
 std::map<std::string, std::vector<intrinsic_row>>* key_to_table;
 std::map<int32_t, std::vector<intrinsic_row>>* iterator_to_table;
 
-std::map<std::string, secondary_index[16]>* key_to_secondary_indexes;
-std::map<int32_t, secondary_index[16]>* iterator_to_secondary_indexes;
-
-std::map<std::string, int32_t>* key_to_iterator_secondary;
-std::map<int32_t, std::string>* iterator_to_key_secondary;
-
 secondary_index_store* secondary_indexes;
 
 extern "C" {
@@ -96,12 +90,6 @@ extern "C" {
 
       key_to_table = new std::map<std::string, std::vector<intrinsic_row>>;
       iterator_to_table = new std::map<int32_t, std::vector<intrinsic_row>>;
-
-      key_to_secondary_indexes = new std::map<std::string, secondary_index[16]>;
-      iterator_to_secondary_indexes = new std::map<int32_t, secondary_index[16]>;
-
-      key_to_iterator_secondary = new std::map<std::string, int32_t>;
-      iterator_to_key_secondary = new std::map<int32_t, std::string>;
 
       secondary_indexes = new secondary_index_store;
 
