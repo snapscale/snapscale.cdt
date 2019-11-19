@@ -172,28 +172,43 @@ extern "C" {
    int32_t db_idx256_store(uint64_t scope, capi_name table, capi_name payer, uint64_t id, const uint128_t* data, uint32_t datalen) {
       // data: [1, 2]
       // datalen: 2
-      idx256_t i;
-      i.v[0] = *data;
-      i.v[1] = *(data+1);
-      return secondary_indexes->store<idx256_t, idx256>(scope, table, payer, id, &i);
+      idx256_t secondary;
+      secondary.v[0] = *data;
+      secondary.v[1] = *(data+1);
+      return secondary_indexes->store<idx256_t, idx256>(scope, table, payer, id, &secondary);
    }
    void db_idx256_remove(int32_t iterator) {
       return secondary_indexes->remove(iterator);
    }
    void db_idx256_update(int32_t iterator, capi_name payer, const uint128_t* data, uint32_t datalen) {
-      return intrinsics::get().call<intrinsics::db_idx256_update>(iterator, payer, data, datalen);
+      idx256_t secondary;
+      secondary.v[0] = *data;
+      secondary.v[1] = *(data+1);
+      return secondary_indexes->update<idx256_t>(iterator, payer, &secondary);
    }
    int32_t db_idx256_find_primary(capi_name code, uint64_t scope, capi_name table, uint128_t* data, uint32_t datalen,  uint64_t primary) {
-      return intrinsics::get().call<intrinsics::db_idx256_find_primary>(code, scope, table, data, datalen, primary);
+      idx256_t secondary;
+      secondary.v[0] = *data;
+      secondary.v[1] = *(data+1);
+      return secondary_indexes->find_primary<idx256_t>(code, scope, table, &secondary, primary);
    }
    int32_t db_idx256_find_secondary(capi_name code, uint64_t scope, capi_name table, const uint128_t* data, uint32_t datalen, uint64_t* primary) {
-      return intrinsics::get().call<intrinsics::db_idx256_find_secondary>(code, scope, table, data, datalen, primary);
+      idx256_t secondary;
+      secondary.v[0] = *data;
+      secondary.v[1] = *(data+1);
+      return secondary_indexes->find_secondary<idx256_t>(code, scope, table, &secondary, primary);
    }
    int32_t db_idx256_lowerbound(capi_name code, uint64_t scope, capi_name table, uint128_t* data, uint32_t datalen, uint64_t* primary) {
-      return intrinsics::get().call<intrinsics::db_idx256_lowerbound>(code, scope, table, data, datalen, primary);
+      idx256_t secondary;
+      secondary.v[0] = *data;
+      secondary.v[1] = *(data+1);
+      return secondary_indexes->lowerbound<idx256_t>(code, scope, table, &secondary, primary);
    }
    int32_t db_idx256_upperbound(capi_name code, uint64_t scope, capi_name table, uint128_t* data, uint32_t datalen,  uint64_t* primary) {
-      return intrinsics::get().call<intrinsics::db_idx256_upperbound>(code, scope, table, data, datalen, primary);
+      idx256_t secondary;
+      secondary.v[0] = *data;
+      secondary.v[1] = *(data+1);
+      return secondary_indexes->upperbound<idx256_t>(code, scope, table, &secondary, primary);
    }
    int32_t db_idx256_end(capi_name code, uint64_t scope, capi_name table) {
       return secondary_indexes->end(code, scope, table);
@@ -237,34 +252,34 @@ extern "C" {
    }
 
    int32_t db_idx_long_double_store(uint64_t scope, capi_name table, capi_name payer, uint64_t id, const long double* secondary) {
-      return intrinsics::get().call<intrinsics::db_idx_long_double_store>(scope, table, payer, id, secondary);
+      return secondary_indexes->store<long double, idxlongdouble>(scope, table, payer, id, secondary);
    }
    void db_idx_long_double_remove(int32_t iterator) {
-      return intrinsics::get().call<intrinsics::db_idx_long_double_remove>(iterator);
+      return secondary_indexes->remove(iterator);
    }
    void db_idx_long_double_update(int32_t iterator, capi_name payer, const long double* secondary) {
-      return intrinsics::get().call<intrinsics::db_idx_long_double_update>(iterator, payer, secondary);
+      return secondary_indexes->update<long double>(iterator, payer, secondary);
    }
    int32_t db_idx_long_double_find_primary(capi_name code, uint64_t scope, capi_name table, long double* secondary, uint64_t primary) {
-      return intrinsics::get().call<intrinsics::db_idx_long_double_find_primary>(code, scope, table, secondary, primary);
+      return secondary_indexes->find_primary<long double>(code, scope, table, secondary, primary);
    }
    int32_t db_idx_long_double_find_secondary(capi_name code, uint64_t scope, capi_name table, const long double* secondary, uint64_t* primary) {
-      return intrinsics::get().call<intrinsics::db_idx_long_double_find_secondary>(code, scope, table, secondary, primary);
+      return secondary_indexes->find_secondary<long double>(code, scope, table, secondary, primary);
    }
    int32_t db_idx_long_double_lowerbound(capi_name code, uint64_t scope, capi_name table, long double* secondary, uint64_t* primary) {
-      return intrinsics::get().call<intrinsics::db_idx_long_double_lowerbound>(code, scope, table, secondary, primary);
+      return secondary_indexes->lowerbound<long double>(code, scope, table, secondary, primary);
    }
    int32_t db_idx_long_double_upperbound(capi_name code, uint64_t scope, capi_name table, long double* secondary, uint64_t* primary) {
-      return intrinsics::get().call<intrinsics::db_idx_long_double_upperbound>(code, scope, table, secondary, primary);
+      return secondary_indexes->upperbound<long double>(code, scope, table, secondary, primary);
    }
    int32_t db_idx_long_double_end(capi_name code, uint64_t scope, capi_name table) {
-      return intrinsics::get().call<intrinsics::db_idx_long_double_end>(code, scope, table);
+      return secondary_indexes->end(code, scope, table);
    }
    int32_t db_idx_long_double_next(int32_t iterator, uint64_t* primary) {
-      return intrinsics::get().call<intrinsics::db_idx_long_double_next>(iterator, primary);
+      return secondary_indexes->next(iterator, primary);
    }
    int32_t db_idx_long_double_previous(int32_t iterator, uint64_t* primary) {
-      return intrinsics::get().call<intrinsics::db_idx_long_double_previous>(iterator, primary);
+      return secondary_indexes->previous(iterator, primary);
    }
 
 

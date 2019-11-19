@@ -38,6 +38,18 @@ struct idx256_t {
    bool operator ==(const idx256_t i2) const {
       return v == i2.v;
    }
+   bool operator <(const idx256_t i2) const {
+      return v < i2.v;
+   }
+   bool operator >(const idx256_t i2) const {
+      return v < i2.v;
+   }
+   bool operator <=(const idx256_t i2) const {
+      return v < i2.v;
+   }
+   bool operator >=(const idx256_t i2) const {
+      return v < i2.v;
+   }
 };
 
 union secondary_index_union {
@@ -84,10 +96,8 @@ struct secondary_index_row {
             return val.idx64 < r2.val.idx64;
          case idx128:
             return val.idx128 < r2.val.idx128;
-            /*
          case idx256:
             return val.idx256 < r2.val.idx256;
-            */
          case idxdouble:
             return val.idxdouble < r2.val.idxdouble;
          case idxlongdouble:
@@ -180,9 +190,11 @@ struct secondary_index_store {
       auto& idxs = key_to_secondary_indexes.at(key);
       auto& idx = idxs[index];
 
-      idx.rows.push_back(secondary_index_row{Idx, *secondary, id});
+      auto sir = secondary_index_row{Idx, 0, id};
+      selectMember<T>(sir.val) = *secondary;
+      idx.rows.push_back(sir);
 
-      iterator_to_secondary_indexes[table_key][index].rows.push_back(secondary_index_row{Idx, *secondary, id});
+      iterator_to_secondary_indexes[table_key][index].rows.push_back(sir);
 
       return table_key_to_iterator(table_key) + index_to_iterator(index) + idx.rows.size() - 1;
    }
