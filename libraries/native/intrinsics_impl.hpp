@@ -42,13 +42,13 @@ struct idx256_t {
       return v < i2.v;
    }
    bool operator >(const idx256_t i2) const {
-      return v < i2.v;
+      return v > i2.v;
    }
    bool operator <=(const idx256_t i2) const {
-      return v < i2.v;
+      return v <= i2.v;
    }
    bool operator >=(const idx256_t i2) const {
-      return v < i2.v;
+      return v >= i2.v;
    }
 };
 
