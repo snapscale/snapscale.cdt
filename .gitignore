@@ -35,7 +35,7 @@
 .DS_Store
 
 # Build
-build/*
+build/
 
 # Python
 __pycache__/
@@ -44,3 +44,6 @@ __pycache__/
 # Editor Files
 .vscode/
 *.vim
+
+# TMP Files
+tmp/build

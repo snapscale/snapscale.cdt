@@ -337,6 +337,7 @@ extern "C" {
       (*key_to_table)[key][itr] = row;
    }
    void db_remove_i64(int32_t iterator) {
+      /*
       int32_t table_key = iterator_to_table_key(iterator);
       int32_t itr  = get_iterator(iterator);
 
@@ -347,6 +348,18 @@ extern "C" {
       (*iterator_to_table)[table_key] = tbl;
 
       (*key_to_table)[key][itr] = NULLROW;
+      */
+
+      int32_t table_key = iterator_to_table_key(iterator);
+      int32_t itr  = get_iterator(iterator);
+
+      auto& tbl = (*iterator_to_table)[table_key];
+      auto key = tbl[itr].table_key;
+
+      tbl.erase(tbl.begin() + itr);
+
+      auto& ktbl = (*key_to_table)[key];
+      ktbl.erase(ktbl.begin() + itr);
    }
    int32_t db_get_i64(int32_t iterator, void* data, uint32_t len) {
       int32_t table_key = iterator_to_table_key(iterator);
@@ -402,7 +415,7 @@ extern "C" {
 
       intrinsic_row match;
       for (const auto& row : tbl) {
-         if (row.primary_key == id) {
+         if (row.primary_key == id && row.table_key == key) {
             match = row;
             break;
          }
@@ -499,7 +512,13 @@ extern "C" {
       }
 
       auto tb = key_to_table->at(key);
-      return tb.size();
+
+      auto index = tb.size();
+      auto& it = tb[tb.size() - 1];
+      while (it.table_key != key) {
+         --index;
+      }
+      return index;
    }
 
 
