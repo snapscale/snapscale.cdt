@@ -161,7 +161,6 @@ struct secondary_index_store {
    std::string normalize_table_name(capi_name table) {
       return eosio::name{ table & 0xFFFFFFFFFFFFFFF0 }.to_string();
    }
-
    std::tuple<int32_t, int32_t, int32_t> unpack_iterator(int32_t iterator) {
       int32_t table_key = iterator_to_table_key(iterator);
       int32_t index = iterator_to_index(iterator);
@@ -169,6 +168,17 @@ struct secondary_index_store {
 
       return std::make_tuple(table_key, index, itr);
    }
+
+   /*
+   TODO: Iterating on secondary indexes must be done on the value of those indexes.
+
+   Solutions:
+   ==========
+
+   1. On every call to store, re-sort that index (secondary_index.rows). This adds overhead to store, but isolates all sorting to one location (except for lower/upper bound??)
+
+   2. On every call to next/prev, sort that index. This adds overhead to next/prev and has sorting in multiple locations.
+   */
 
    template <typename T, secondary_index_type Idx>
    int32_t store(uint64_t scope, uint64_t table, uint64_t payer, const uint64_t id, const T* secondary) {
@@ -189,16 +199,30 @@ struct secondary_index_store {
          table_key = key_to_iterator_secondary[key];
       }
 
-      auto& idxs = key_to_secondary_indexes.at(key);
+      auto& kidxs = key_to_secondary_indexes.at(key);
+      auto& kidx = kidxs[index];
+      auto& idxs = iterator_to_secondary_indexes.at(table_key);
       auto& idx = idxs[index];
 
       auto sir = secondary_index_row{Idx, 0, id};
       selectMember<T>(sir.val) = *secondary;
+
+      kidx.rows.push_back(sir);
       idx.rows.push_back(sir);
 
-      iterator_to_secondary_indexes[table_key][index].rows.push_back(sir);
+      std::sort(kidx.rows.begin(), kidx.rows.end());
+      std::sort(idx.rows.begin(), idx.rows.end());
 
-      return table_key_to_iterator(table_key) + index_to_iterator(index) + idx.rows.size() - 1;
+      // TODO: Now size is not the accurate position, so need to find it then return it.
+      for (int i = 0; i < idx.rows.size(); ++i) {
+         if (idx.rows[i] == sir) {
+            return i;
+         }
+      }
+
+      // Should never happen
+      return -1;
+      // return table_key_to_iterator(table_key) + index_to_iterator(index) + idx.rows.size() - 1;
    }
 
 
@@ -255,7 +279,7 @@ struct secondary_index_store {
 
       for (int i = 0; i < idx.rows.size(); ++i) {
          auto& row = idx.rows[i];
-         if (selectMember<T>(row.val)== *secondary) {
+         if (selectMember<T>(row.val) == *secondary) {
             *primary = row.primary_key;
             int32_t table_key = table_key_to_iterator(key_to_iterator_secondary[key]);
             return table_key + index_to_iterator(index) + i;
@@ -383,13 +407,13 @@ struct secondary_index_store {
       int32_t index = iterator_to_index(iterator);
       int32_t itr = get_iterator(iterator);
 
-      int32_t new_it = itr+1;
+      int32_t new_it = itr + 1;
 
       auto& idx = iterator_to_secondary_indexes[table_key][index];
       if (new_it == idx.rows.size()) return -1;
 
       *primary = idx.rows[new_it].primary_key;
-      return iterator+1;
+      return iterator + 1;
    }
 
    int32_t previous(int32_t iterator, uint64_t* primary) {
@@ -397,16 +421,14 @@ struct secondary_index_store {
       int32_t index = iterator_to_index(iterator);
       int32_t itr = get_iterator(iterator);
 
-      int32_t new_it = itr-1;
+      int32_t new_it = itr - 1;
       if (new_it < 0) return -1;
 
       auto& idx = iterator_to_secondary_indexes[table_key][index];
 
       *primary = idx.rows[new_it].primary_key;
-      return iterator-1;
+      return iterator - 1;
    }
-
-
 };
 
 // Primary Index

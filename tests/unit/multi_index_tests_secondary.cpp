@@ -42,10 +42,10 @@ EOSIO_TEST_BEGIN(multi_index_secondary_index_test)
    auto sec = addresses.get_index<name("secondary1")>();
    auto sitr = sec.find(8);
    CHECK_EQUAL(sitr->user, eosio::name{"john"});
-   /*
-   sitr++; // TODO: Is iterating broken currently?
+   // TODO: Iterating IS broken currently
+   sitr++;
    CHECK_EQUAL(sitr->user, eosio::name{"alice"});
-
+   /*
    auto itr = addresses.find(1);
    addresses.modify(itr, self, [&]( auto& row ) {
       row.user = name{"bruce"};
