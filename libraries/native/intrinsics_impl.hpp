@@ -281,7 +281,7 @@ struct secondary_index_store {
 
       std::copy(idx.rows.begin(), idx.rows.end(), std::back_inserter(to_sort));
 
-      auto cmp = [](secondary_index_row a, secondary_index_row b) { return a.val.idx64 < b.val.idx64; };
+      auto cmp = [](secondary_index_row a, secondary_index_row b) { return selectMember<T>(a.val) < selectMember<T>(b.val); };
       std::sort(to_sort.begin(), to_sort.end(), cmp);
 
       auto row_itr = to_sort.begin();

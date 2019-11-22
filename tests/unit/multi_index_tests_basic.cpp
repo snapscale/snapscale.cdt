@@ -204,7 +204,6 @@ EOSIO_TEST_BEGIN(multi_index_bounds_test)
    CHECK_EQUAL(itr->user, name{"a"});
    itr++;
    CHECK_EQUAL(itr->user, name{"b"});
-
 EOSIO_TEST_END
 
 int main(int argc, char** argv) {
@@ -212,6 +211,6 @@ int main(int argc, char** argv) {
    // EOSIO_TEST(multi_index_test);
    // EOSIO_TEST(multi_index_remove_test);
    // EOSIO_TEST(multi_index_iterate_test);
-   EOSIO_TEST(multi_index_bounds_test);
+   // EOSIO_TEST(multi_index_bounds_test);
    return has_failed();
 }
