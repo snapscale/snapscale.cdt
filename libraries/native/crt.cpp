@@ -16,6 +16,8 @@ std::map<int32_t, std::vector<intrinsic_row>>* iterator_to_table;
 
 secondary_index_store* secondary_indexes;
 
+contract_state* global_state;
+
 extern "C" {
    int main(int, char**);
    char* _mmap();
@@ -92,6 +94,8 @@ extern "C" {
       iterator_to_table = new std::map<int32_t, std::vector<intrinsic_row>>;
 
       secondary_indexes = new secondary_index_store;
+
+      global_state = new contract_state;
 
       // preset the print functions
       intrinsics::set_intrinsic<intrinsics::prints_l>([](const char* cs, uint32_t l) {

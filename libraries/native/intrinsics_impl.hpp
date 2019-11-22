@@ -9,6 +9,11 @@
 
 #pragma once
 
+// Global State
+struct contract_state {
+   eosio::name code;
+};
+extern contract_state* global_state;
 
 struct intrinsic_row {
    intrinsic_row() = default;
@@ -114,9 +119,6 @@ struct secondary_index {
    std::string table_key;
 };
 
-static const eosio::name TESTING_CODE = eosio::name{ "test" };
-static const intrinsic_row NULLROW{ "", -1, "", 0 };
-
 static const secondary_index_row SNULLROW{ empty, 0, -1 };
 
 template <typename T>
@@ -170,7 +172,7 @@ struct secondary_index_store {
 
    template <typename T, secondary_index_type Idx>
    int32_t store(uint64_t scope, uint64_t table, uint64_t payer, const uint64_t id, const T* secondary) {
-      std::string key = TESTING_CODE.to_string() + eosio::name{ scope }.to_string() + normalize_table_name(table);
+      std::string key = global_state->code.to_string() + eosio::name{ scope }.to_string() + normalize_table_name(table);
       uint64_t index = table_name_to_index(table);
 
       int32_t table_key;
@@ -215,7 +217,7 @@ struct secondary_index_store {
 
    template <typename T>
    int32_t find_primary(uint64_t code, uint64_t scope, uint64_t table, T* secondary, uint64_t primary) {
-      std::string key = TESTING_CODE.to_string() + eosio::name{ scope }.to_string() + normalize_table_name(table);
+      std::string key = eosio::name{ code }.to_string() + eosio::name{ scope }.to_string() + normalize_table_name(table);
       uint64_t index = table_name_to_index(table);
 
       auto t = key_to_secondary_indexes.find(key);
@@ -240,7 +242,7 @@ struct secondary_index_store {
 
    template <typename T>
    int32_t find_secondary(capi_name code, uint64_t scope, capi_name table, const T* secondary, uint64_t* primary) {
-      std::string key = TESTING_CODE.to_string() + eosio::name{ scope }.to_string() + normalize_table_name(table);
+      std::string key = eosio::name{ code }.to_string() + eosio::name{ scope }.to_string() + normalize_table_name(table);
       uint64_t index = table_name_to_index(table);
 
       auto t = key_to_secondary_indexes.find(key);
@@ -265,7 +267,7 @@ struct secondary_index_store {
 
    template <typename T>
    int32_t lowerbound(capi_name code, uint64_t scope, capi_name table, T* secondary, uint64_t* primary) {
-      std::string key = TESTING_CODE.to_string() + eosio::name{ scope }.to_string() + normalize_table_name(table);
+      std::string key = eosio::name{ code }.to_string() + eosio::name{ scope }.to_string() + normalize_table_name(table);
 
       auto t = key_to_secondary_indexes.find(key);
       if (t == key_to_secondary_indexes.end()) {
@@ -310,7 +312,7 @@ struct secondary_index_store {
 
    template <typename T>
    int32_t upperbound(capi_name code, uint64_t scope, capi_name table, T* secondary, uint64_t* primary) {
-      std::string key = TESTING_CODE.to_string() + eosio::name{ scope }.to_string() + normalize_table_name(table);
+      std::string key = eosio::name{ code }.to_string() + eosio::name{ scope }.to_string() + normalize_table_name(table);
 
       auto t = key_to_secondary_indexes.find(key);
       if (t == key_to_secondary_indexes.end()) {
@@ -364,7 +366,7 @@ struct secondary_index_store {
    }
 
    int32_t end(capi_name code, uint64_t scope, capi_name table) {
-      std::string key = TESTING_CODE.to_string() + eosio::name{ scope }.to_string() + normalize_table_name(table);
+      std::string key = eosio::name{ code }.to_string() + eosio::name{ scope }.to_string() + normalize_table_name(table);
 
       auto t = key_to_secondary_indexes.find(key);
       if (t == key_to_secondary_indexes.end()) {

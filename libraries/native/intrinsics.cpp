@@ -170,8 +170,6 @@ extern "C" {
    }
 
    int32_t db_idx256_store(uint64_t scope, capi_name table, capi_name payer, uint64_t id, const uint128_t* data, uint32_t datalen) {
-      // data: [1, 2]
-      // datalen: 2
       idx256_t secondary;
       secondary.v[0] = *data;
       secondary.v[1] = *(data+1);
@@ -286,7 +284,7 @@ extern "C" {
 
 
    int32_t db_store_i64(uint64_t scope, capi_name table, capi_name payer, uint64_t id,  const void* data, uint32_t len) {
-      std::string key = TESTING_CODE.to_string() + eosio::name{ scope }.to_string() + eosio::name{ table }.to_string();
+      std::string key = global_state->code.to_string() + eosio::name{ scope }.to_string() + eosio::name{ table }.to_string();
 
       intrinsic_row row{ key, id, data, len };
 
@@ -337,19 +335,6 @@ extern "C" {
       (*key_to_table)[key][itr] = row;
    }
    void db_remove_i64(int32_t iterator) {
-      /*
-      int32_t table_key = iterator_to_table_key(iterator);
-      int32_t itr  = get_iterator(iterator);
-
-      auto tbl = (*iterator_to_table)[table_key];
-      auto key = tbl[itr].table_key;
-
-      tbl[itr] = NULLROW;
-      (*iterator_to_table)[table_key] = tbl;
-
-      (*key_to_table)[key][itr] = NULLROW;
-      */
-
       int32_t table_key = iterator_to_table_key(iterator);
       int32_t itr  = get_iterator(iterator);
 
@@ -512,13 +497,7 @@ extern "C" {
       }
 
       auto tb = key_to_table->at(key);
-
-      auto index = tb.size();
-      auto& it = tb[tb.size() - 1];
-      while (it.table_key != key) {
-         --index;
-      }
-      return index;
+      return tb.size();
    }
 
 

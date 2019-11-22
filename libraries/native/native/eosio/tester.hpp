@@ -143,3 +143,11 @@ inline bool expect_print(bool check, const std::string& li, const char (&expecte
       ___has_failed |= ___earlier_unit_test_has_failed; \
       ___earlier_unit_test_has_failed = ___has_failed; \
    }
+
+struct contract_state {
+   eosio::name code;
+};
+extern contract_state* global_state;
+void apply_state(contract_state* cs) {
+   global_state = cs;
+}
