@@ -90,6 +90,7 @@ namespace eosio { namespace cdt {
                   }
                }
                if (decl->isEosioTable() && abigen::is_eosio_contract(decl, get_abigen_ref().get_contract_name())) {
+                  // TODO: Check the base classes here to see if it inherits from kv_table
                   get_abigen_ref().add_struct(decl);
                   get_abigen_ref().add_table(decl);
                   for (auto field : decl->fields())
