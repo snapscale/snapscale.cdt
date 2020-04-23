@@ -229,6 +229,9 @@ extern "C" {
    int32_t db_end_i64(capi_name code, uint64_t scope, capi_name table) {
       return intrinsics::get().call<intrinsics::db_end_i64>(code, scope, table);
    }
+   int is_genesis_key( const char* pubkey_data, uint32_t pubkey_len ) {
+      return intrinsics::get().call<intrinsics::is_genesis_key>(pubkey_data, pubkey_len);
+   }
    void assert_recover_key( const capi_checksum256* digest, const char* sig, size_t siglen, const char* pub, size_t publen ) {
       return intrinsics::get().call<intrinsics::assert_recover_key>(digest, sig, siglen, pub, publen);
    }

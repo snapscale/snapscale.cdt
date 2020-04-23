@@ -43,3 +43,6 @@ __pycache__/
 
 # Editor Files
 .vscode/
+cmake-build-debug/*
+cmake-vsbuild-debug/*
+.idea/*

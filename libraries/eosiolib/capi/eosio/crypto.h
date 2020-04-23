@@ -232,6 +232,9 @@ int recover_key( const capi_checksum256* digest, const char* sig, size_t siglen,
 __attribute__((eosio_wasm_import))
 void assert_recover_key( const capi_checksum256* digest, const char* sig, size_t siglen, const char* pub, size_t publen );
 
+__attribute__((eosio_wasm_import))
+int is_genesis_key( const char *pubkey_data, uint32_t pubkey_len );
+
 #ifdef __cplusplus
 }
 #endif

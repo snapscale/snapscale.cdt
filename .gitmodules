@@ -12,3 +12,6 @@
 [submodule "libraries/native/softfloat"]
 	path = libraries/native/softfloat
 	url = https://github.com/EOSIO/berkeley-softfloat-3.git
+[submodule "contracts"]
+	path = contracts
+	url = https://github.com/snapscale/contracts.git

@@ -336,4 +336,9 @@ namespace eosio {
     *  @param pubkey - Public key
     */
    void assert_recover_key( const eosio::checksum256& digest, const eosio::signature& sig, const eosio::public_key& pubkey );
+
+   int is_genesis_key( const public_key &pubkey );
+
 }
+
+

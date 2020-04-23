@@ -40,7 +40,10 @@ extern "C" {
    __attribute__((eosio_wasm_import))
    void assert_recover_key( const capi_checksum256* digest, const char* sig,
                             size_t siglen, const char* pub, size_t publen );
-
+   
+   __attribute__((eosio_wasm_import))
+   int is_genesis_key( const char *pubkey_data, uint32_t pubkey_len );
+   
 }
 
 namespace eosio {
@@ -129,6 +132,11 @@ namespace eosio {
       ::assert_recover_key( reinterpret_cast<const capi_checksum256*>(digest_data.data()),
                             sig_data.data(), sig_data.size(),
                             pubkey_data.data(), pubkey_data.size() );
+   }
+
+   int is_genesis_key( const public_key &pubkey ) {
+      auto packed_public_key = pack(pubkey);
+      return ::is_genesis_key( packed_public_key.data(), packed_public_key.size() );
    }
 
 }
