@@ -1,8 +1,5 @@
-# SnapScale.CDT (Contract Development Toolkit)
+# SnapScale CDT (Contract Development Toolkit)
 SnapScale.CDT is a toolchain for WebAssembly (WASM) and set of tools to facilitate smart contract development for the SnapScale platform. In addition to being a general purpose WebAssembly toolchain, [SnapScale](https://github.com/snapscale/snapscale) specific optimizations are available to support building SnapScale smart contracts.  This new toolchain is built around [Clang 7](https://github.com/eosio/llvm), which means that SnapScale.CDT has the most currently available optimizations and analyses from LLVM, but as the WASM target is still considered experimental, some optimizations are incomplete or not available.
-
-### New Introductions
-As of this release two new repositories are under the suite of tools provided by **SnapScale.CDT**.  These are the [Ricardian Template Toolkit](https://github.com/eosio/ricardian-template-toolkit) and the [Ricardian Specification](https://github.com/eosio/ricardian-spec).  The **Ricardian Template Toolkit** is a set of libraries to facilitate smart contract writers in crafting their Ricardian contracts.  The Ricardian specification is the working specification for the above mentioned toolkit.  Please note that both projects are **alpha** releases and are subject to change.
 
 ### Attention
 - There is currently a known issue that a minimum of 2 CPU cores is required for using SnapScale.CDT
@@ -55,7 +52,7 @@ eosio-readelf
 
 ## License
 
-[MIT](../LICENSE)
+SnapScale is released under the Apache 2.0 license and is offered “AS IS” without warranty of any kind, express or implied. Any security provided by the SnapScale software depends in part on how it is used, configured, and deployed. SnapScale is built upon many third-party libraries such as WABT (Apache License) and WAVM (BSD 3-clause) which are also provided “AS IS” without warranty of any kind.
 
 ## Important
 
