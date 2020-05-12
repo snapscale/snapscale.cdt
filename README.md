@@ -33,26 +33,6 @@ sudo rm -fr /usr/local/lib/cmake/eosio.cdt
 sudo rm /usr/local/bin/eosio-*
 ```
 
-## Installed Tools
-
-* eosio-cpp
-* eosio-cc
-* eosio-ld
-* eosio-init
-* eosio-abidiff
-* eosio-wasm2wast
-* eosio-wast2wasm
-* eosio-ranlib
-* eosio-ar
-* eosio-objdump
-* eosio-readelf
-
-Below tools are not installed after brew install, you get them only by building the repository and installing from scracth, [see here](#guided_installation_or_building_from_scratch)
-eosio-abidiff
-eosio-ranlib
-eosio-ar
-eosio-objdump
-eosio-readelf
 
 ## License
 
@@ -97,26 +77,6 @@ sudo rm -fr /usr/local/lib/cmake/eosio.cdt
 sudo rm /usr/local/bin/eosio-*
 ```
 
-## 安装工具
-
-* eosio-cpp
-* eosio-cc
-* eosio-ld
-* eosio-init
-* eosio-abidiff
-* eosio-wasm2wast
-* eosio-wast2wasm
-* eosio-ranlib
-* eosio-ar
-* eosio-objdump
-* eosio-readelf
-
-
-如果您进行Brew安装后仍未成功安装以下工具，您只能通过构建存储库并来获得它们，请[参考](#guided_installation_or_building_from_scratch) eosio-abidiff
-eosio-ranlib
-eosio-ar
-eosio-objdump
-eosio-readelf
 
 ## 许可协议
 
