@@ -42,6 +42,7 @@ namespace eosio { namespace native {
 #define INTRINSICS(intrinsic_macro) \
 intrinsic_macro(get_resource_limits) \
 intrinsic_macro(set_resource_limits) \
+intrinsic_macro(set_gas_price) \
 intrinsic_macro(set_proposed_producers) \
 intrinsic_macro(set_proposed_producers_ex) \
 intrinsic_macro(get_blockchain_parameters_packed) \

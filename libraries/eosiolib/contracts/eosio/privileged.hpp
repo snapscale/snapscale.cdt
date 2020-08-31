@@ -19,6 +19,9 @@ namespace eosio {
          void set_resource_limits( uint64_t account, int64_t ram_bytes, int64_t net_weight, int64_t cpu_weight );
 
          __attribute__((eosio_wasm_import))
+         void set_gas_price( uint64_t account, int64_t gas_price );
+
+         __attribute__((eosio_wasm_import))
          void set_privileged( uint64_t account, bool is_priv );
 
          __attribute__((eosio_wasm_import))
@@ -206,6 +209,10 @@ namespace eosio {
     */
    inline void set_resource_limits( name account, int64_t ram_bytes, int64_t net_weight, int64_t cpu_weight ) {
       internal_use_do_not_use::set_resource_limits( account.value, ram_bytes, net_weight, cpu_weight );
+   }
+
+   inline void set_gas_price( name account, int64_t gas_price ) {
+      internal_use_do_not_use::set_gas_price( account.value, gas_price );
    }
 
    /**

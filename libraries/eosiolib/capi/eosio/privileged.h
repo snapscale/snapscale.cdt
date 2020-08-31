@@ -32,6 +32,9 @@ void get_resource_limits( capi_name account, int64_t* ram_bytes, int64_t* net_we
 __attribute__((eosio_wasm_import))
 void set_resource_limits( capi_name account, int64_t ram_bytes, int64_t net_weight, int64_t cpu_weight );
 
+__attribute__((eosio_wasm_import))
+void set_gas_price( capi_name account, int64_t gas_price );
+
 /**
  * Proposes a schedule change
  *
